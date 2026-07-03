@@ -109,7 +109,9 @@ export async function onRequest(context) {
       }
 
       // Get sheet info for clearing
-      const info = await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}`)).json()
+      const info = await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })).json()
       const sheetInfo = (info.sheets || []).find(s => s.properties.title === lembaga)
       if (!sheetInfo) { result[lembaga] = 'sheet not found'; continue }
       const gid = sheetInfo.properties.sheetId
