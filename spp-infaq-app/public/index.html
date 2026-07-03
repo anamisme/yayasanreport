@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPP & Infaq - MIS & MTs</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --primary: #1a73e8;
+  --primary-dark: #1557b0;
+  --success: #0f9d58;
+  --warning: #f4b400;
+  --danger: #ea4335;
+  --bg: #f0f4f8;
+  --card: #ffffff;
+  --text: #333;
+  --text-secondary: #666;
+  --border: #e0e0e0;
+  --radius: 10px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+.topbar {
+  background: var(--primary);
+  color: white;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.topbar h1 { font-size: 18px; font-weight: 600; }
+.topbar .sub { font-size: 12px; opacity: 0.8; }
+.tab-nav {
+  display: flex;
+  background: white;
+  border-bottom: 2px solid var(--border);
+  position: sticky;
+  top: 52px;
+  z-index: 99;
+}
+.tab-nav button {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  background: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+  border-bottom: 3px solid transparent;
+}
+.tab-nav button.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+.tab-nav button:hover { background: #f5f5f5; }
+.container { max-width: 1200px; margin: 0 auto; padding: 16px; }
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.card h2 { font-size: 16px; margin-bottom: 12px; color: var(--text); }
+.card h3 { font-size: 14px; margin-bottom: 8px; color: var(--text-secondary); }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.stat-box {
+  text-align: center;
+  padding: 16px;
+  border-radius: var(--radius);
+  background: #f8faff;
+  border: 1px solid var(--border);
+}
+.stat-box .value { font-size: 28px; font-weight: 700; color: var(--primary); }
+.stat-box .label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+.stat-box.success .value { color: var(--success); }
+.stat-box.warning .value { color: var(--warning); }
+.stat-box.danger .value { color: var(--danger); }
+input, select, button, textarea {
+  font-family: inherit;
+  font-size: 14px;
+}
+input, select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  outline: none;
+  transition: border 0.2s;
+}
+input:focus, select:focus { border-color: var(--primary); }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-success { background: var(--success); color: white; }
+.btn-success:hover { background: #0b8043; }
+.btn-danger { background: var(--danger); color: white; }
+.btn-danger:hover { background: #d33426; }
+.btn-warning { background: var(--warning); color: white; }
+.btn-outline {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.btn-outline:hover { background: #f5f5f5; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.form-group { margin-bottom: 12px; }
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.search-box {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.search-box input { flex: 1; }
+.search-box select { width: auto; min-width: 140px; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+th { font-weight: 600; color: var(--text-secondary); background: #fafafa; font-size: 12px; text-transform: uppercase; }
+tr:hover { background: #f8faff; }
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.badge-success { background: #e6f4ea; color: var(--success); }
+.badge-danger { background: #fce8e6; color: var(--danger); }
+.badge-warning { background: #fef7e0; color: var(--warning); }
+.mt-2 { margin-top: 16px; }
+.mb-2 { margin-bottom: 16px; }
+.text-right { text-align: right; }
+.flex { display: flex; }
+.flex-between { display: flex; justify-content: space-between; align-items: center; }
+.gap-2 { gap: 8px; }
+.hidden { display: none !important; }
+.modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: white;
+  border-radius: var(--radius);
+  padding: 24px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.modal-content h2 { margin-bottom: 16px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-secondary);
+}
+.chart-container { height: 300px; margin-top: 12px; }
+@media (max-width: 768px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+  .search-box { flex-direction: column; }
+  .search-box select { width: 100%; }
+}
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 500;
+  z-index: 2000;
+  animation: slideUp 0.3s ease;
+}
+.toast-success { background: var(--success); }
+.toast-error { background: var(--danger); }
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <h1>SPP & Infaq</h1>
+    <div class="sub">MIS Baitul Hikmah / MTs Baitul Hikmah</div>
+  </div>
+  <div>
+    <button class="btn btn-outline btn-sm" style="color:white;border-color:rgba(255,255,255,0.3)" onclick="refreshAll()">🔄 Muat Ulang</button>
+  </div>
+</div>
+
+<div class="tab-nav" id="tabNav">
+  <button class="active" data-tab="dashboard">📊 Dashboard</button>
+  <button data-tab="bayar">💰 Pembayaran</button>
+  <button data-tab="siswa">👥 Siswa</button>
+  <button data-tab="kategori">🏷️ Kategori</button>
+  <button data-tab="paud">🎒 PAUD</button>
+</div>
+
+<div class="container" id="app">
+
+<div id="tab-dashboard" class="tab-content">
+  <div class="flex-between mb-2">
+    <div>
+      <select id="dashLembaga" onchange="loadDashboard()">
+        <option value="MIS">MIS</option>
+        <option value="MTs">MTs</option>
+      </select>
+      <select id="dashTahun" onchange="loadDashboard()" style="width:auto;margin-left:8px">
+      </select>
+    </div>
+  </div>
+  <div class="grid-4" id="dashStats"></div>
+  <div class="card">
+    <h2>Persentase Pembayaran per Bulan</h2>
+    <div class="chart-container">
+      <canvas id="chartPayment"></canvas>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <h2>Total Pemasukan per Bulan</h2>
+      <div class="chart-container">
+        <canvas id="chartIncome"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Siswa Belum Bayar (Bulan Ini)</h2>
+      <div id="unpaidList"></div>
+    </div>
+  </div>
+</div>
+
+<div id="tab-bayar" class="tab-content hidden">
+  <div class="card">
+    <h2>Catat Pembayaran</h2>
+    <div class="search-box">
+      <input type="text" id="paySearch" placeholder="Cari nama siswa..." oninput="searchSiswaBayar()">
+      <select id="payLembaga" onchange="searchSiswaBayar()">
+        <option value="MIS">MIS</option>
+        <option value="MTs">MTs</option>
+      </select>
+    </div>
+    <div id="paySearchResults" class="mb-2"></div>
+
+    <div id="payForm" class="hidden">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nama Siswa</label>
+          <input type="text" id="payNama" readonly>
+        </div>
+        <div class="form-group">
+          <label>Lembaga</label>
+          <input type="text" id="payLembagaDisplay" readonly>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Bulan</label>
+          <select id="payBulan"></select>
+        </div>
+        <div class="form-group">
+          <label>Tahun</label>
+          <select id="payTahun"></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Kategori</label>
+          <select id="payKategori"></select>
+        </div>
+        <div class="form-group">
+          <label>Jumlah (Rp)</label>
+          <input type="number" id="payJumlah">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Keterangan (opsional)</label>
+        <input type="text" id="payKeterangan" placeholder="Misal: Lunas bulan ini">
+      </div>
+      <button class="btn btn-success" onclick="simpanPembayaran()">💾 Simpan Pembayaran</button>
+      <button class="btn btn-outline" onclick="batalPembayaran()">Batal</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="flex-between">
+      <h2>Riwayat Pembayaran</h2>
+      <div>
+        <select id="riwayatLembaga" onchange="loadRiwayat()">
+          <option value="">Semua</option>
+          <option value="MIS">MIS</option>
+          <option value="MTs">MTs</option>
+        </select>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Nama</th>
+            <th>Lembaga</th>
+            <th>Bulan</th>
+            <th>Tahun</th>
+            <th>Kategori</th>
+            <th>Jumlah</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="riwayatTable"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="tab-siswa" class="tab-content hidden">
+  <div class="flex-between mb-2">
+    <h2>Data Siswa</h2>
+    <button class="btn btn-primary" onclick="showTambahSiswa()">+ Tambah Siswa</button>
+  </div>
+  <div class="search-box">
+    <input type="text" id="siswaSearch" placeholder="Cari nama siswa..." oninput="loadSiswa()">
+    <select id="siswaLembaga" onchange="loadSiswa()">
+      <option value="">Semua Lembaga</option>
+      <option value="MIS">MIS</option>
+      <option value="MTs">MTs</option>
+    </select>
+    <select id="siswaKelas" onchange="loadSiswa()">
+      <option value="">Semua Kelas</option>
+    </select>
+  </div>
+  <div class="card">
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Nama</th>
+            <th>Lembaga</th>
+            <th>Kelas</th>
+            <th>Tarif</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="siswaTable"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="tab-kategori" class="tab-content hidden">
+  <div class="flex-between mb-2">
+    <h2>Kategori Pembayaran</h2>
+    <button class="btn btn-primary" onclick="showTambahKategori()">+ Tambah Kategori</button>
+  </div>
+  <div class="card">
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>Nama</th>
+            <th>Lembaga</th>
+            <th>Jumlah Default</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="kategoriTable"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div id="tab-paud" class="tab-content hidden">
+  <div class="flex-between mb-2">
+    <h2>Data Siswa PAUD</h2>
+    <button class="btn btn-primary" onclick="showTambahPaud()">+ Tambah Siswa PAUD</button>
+  </div>
+  <div class="card" style="border-left:4px solid var(--warning)">
+    <div class="flex-between">
+      <div>
+        <p style="color:var(--text-secondary);font-size:13px">PAUD dikelola terpisah dari siswa MIS/MTs reguler.</p>
+      </div>
+    </div>
+  </div>
+  <div class="search-box">
+    <input type="text" id="paudSearch" placeholder="Cari nama siswa PAUD..." oninput="loadPaud()">
+  </div>
+  <div class="card">
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Nama</th>
+            <th>Tarif</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="paudTable"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="modal" class="modal hidden">
+  <div class="modal-content" id="modalBody"></div>
+</div>
+
+<script>
+const API = ''
+
+const BULAN_NAMES = [
+  'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+]
+
+let paymentChart = null
+let incomeChart = null
+let selectedSiswaId = null
+let allSiswaCache = {}
+
+function toast(msg, type = 'success') {
+  const t = document.createElement('div')
+  t.className = `toast toast-${type}`
+  t.textContent = msg
+  document.body.appendChild(t)
+  setTimeout(() => t.remove(), 3000)
+}
+
+function $(id) { return document.getElementById(id) }
+
+function modal(html) {
+  $('modalBody').innerHTML = html
+  $('modal').classList.remove('hidden')
+}
+
+function closeModal() {
+  $('modal').classList.add('hidden')
+}
+
+$('modal').onclick = (e) => {
+  if (e.target === $('modal')) closeModal()
+}
+
+// Tab navigation
+document.querySelectorAll('.tab-nav button').forEach((btn) => {
+  btn.onclick = () => {
+    document.querySelectorAll('.tab-nav button').forEach((b) => b.classList.remove('active'))
+    btn.classList.add('active')
+    document.querySelectorAll('.tab-content').forEach((t) => t.classList.add('hidden'))
+    $(`tab-${btn.dataset.tab}`).classList.remove('hidden')
+    if (btn.dataset.tab === 'dashboard') loadDashboard()
+    if (btn.dataset.tab === 'bayar') { loadRiwayat(); initBayarForm() }
+    if (btn.dataset.tab === 'siswa') loadSiswa()
+    if (btn.dataset.tab === 'kategori') loadKategori()
+    if (btn.dataset.tab === 'paud') loadPaud()
+  }
+})
+
+// Init
+function init() {
+  const year = new Date().getFullYear()
+  const ySel = $('dashTahun')
+  for (let y = year; y >= year - 5; y--) {
+    ySel.innerHTML += `<option value="${y}">${y}</option>`
+  }
+  const bulanSel = $('payBulan')
+  BULAN_NAMES.forEach((n, i) => {
+    bulanSel.innerHTML += `<option value="${i + 1}" ${i === new Date().getMonth() ? 'selected' : ''}>${n}</option>`
+  })
+  const tahunSel = $('payTahun')
+  for (let y = year; y >= year - 5; y--) {
+    tahunSel.innerHTML += `<option value="${y}" ${y === year ? 'selected' : ''}>${y}</option>`
+  }
+  loadDashboard()
+  loadKelasOptions()
+}
+
+document.addEventListener('DOMContentLoaded', init)
+
+async function api(path, opts = {}) {
+  const res = await fetch(`${API}/api${path}`, {
+    headers: { 'Content-Type': 'application/json', ...opts.headers },
+    ...opts,
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }))
+    throw new Error(err.error || 'Request failed')
+  }
+  return res.json()
+}
+
+async function refreshAll() {
+  const active = document.querySelector('.tab-nav button.active')
+  if (active) active.click()
+  toast('Data diperbarui')
+}
+
+// --- DASHBOARD ---
+async function loadDashboard() {
+  const lembaga = $('dashLembaga').value
+  const tahun = parseInt($('dashTahun').value)
+  try {
+    const data = await api(`/stats?lembaga=${lembaga}&tahun=${tahun}`)
+    renderDashboard(data)
+  } catch (e) {
+    toast(e.message, 'error')
+  }
+}
+
+function renderDashboard(data) {
+  const stats = data.monthly
+  const now = new Date().getMonth()
+  const thisMonth = stats[now]
+
+  $('dashStats').innerHTML = `
+    <div class="stat-box"><div class="value">${data.totalSiswa}</div><div class="label">Total Siswa</div></div>
+    <div class="stat-box success"><div class="value">${thisMonth ? thisMonth.paidCount : 0}</div><div class="label">Lunas Bulan Ini</div></div>
+    <div class="stat-box warning"><div class="value">${thisMonth ? thisMonth.unpaidCount : 0}</div><div class="label">Belum Bayar</div></div>
+    <div class="stat-box"><div class="value">Rp ${(data.totalPemasukan || 0).toLocaleString('id-ID')}</div><div class="label">Total Pemasukan ${data.tahun}</div></div>
+  `
+
+  renderPaymentChart(stats)
+  renderIncomeChart(stats)
+  renderUnpaidList(stats, now, data.lembaga)
+}
+
+function renderPaymentChart(stats) {
+  const ctx = document.getElementById('chartPayment').getContext('2d')
+  if (paymentChart) paymentChart.destroy()
+  paymentChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: stats.map((s) => s.bulanNama),
+      datasets: [
+        {
+          label: 'Lunas',
+          data: stats.map((s) => s.paidCount),
+          backgroundColor: '#0f9d58',
+          borderRadius: 4,
+        },
+        {
+          label: 'Belum Bayar',
+          data: stats.map((s) => s.unpaidCount),
+          backgroundColor: '#ea4335',
+          borderRadius: 4,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { stacked: true },
+        y: { stacked: true, beginAtZero: true },
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: (ctx) => `${ctx.dataset.label}: ${ctx.raw} siswa (${Math.round(ctx.raw / (ctx.raw + ctx.dataset.data[ctx.dataIndex === 0 ? 1 : 0]) * 100) || 0}%)`,
+          },
+        },
+      },
+    },
+  })
+}
+
+function renderIncomeChart(stats) {
+  const ctx = document.getElementById('chartIncome').getContext('2d')
+  if (incomeChart) incomeChart.destroy()
+  incomeChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: stats.map((s) => s.bulanNama),
+      datasets: [
+        {
+          label: 'Pemasukan (Rp)',
+          data: stats.map((s) => s.totalBayar),
+          borderColor: '#1a73e8',
+          backgroundColor: 'rgba(26,115,232,0.1)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 4,
+          pointBackgroundColor: '#1a73e8',
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { callback: (v) => 'Rp ' + v.toLocaleString('id-ID') },
+        },
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: (ctx) => 'Rp ' + ctx.raw.toLocaleString('id-ID'),
+          },
+        },
+      },
+    },
+  })
+}
+
+async function renderUnpaidList(stats, monthIdx, lembaga) {
+  const bulan = monthIdx + 1
+  const tahun = parseInt($('dashTahun').value)
+  const el = $('unpaidList')
+  try {
+    const siswa = await api(`/siswa?lembaga=${lembaga}`)
+    const payments = await api(`/pembayaran?lembaga=${lembaga}&bulan=${bulan}&tahun=${tahun}`)
+    const paidIds = new Set(payments.map((p) => p.siswaId))
+    const unpaid = siswa.filter((s) => !paidIds.has(s.id))
+
+    if (unpaid.length === 0) {
+      el.innerHTML = '<div class="empty-state">✅ Semua siswa sudah membayar!</div>'
+      return
+    }
+
+    let html = '<div style="max-height:250px;overflow-y:auto"><table><thead><tr><th>Nama</th><th>Kelas</th></tr></thead><tbody>'
+    unpaid.slice(0, 50).forEach((s) => {
+      html += `<tr><td>${s.nama}</td><td>${s.kelas}</td></tr>`
+    })
+    if (unpaid.length > 50) html += `<tr><td colspan="2">...dan ${unpaid.length - 50} lainnya</td></tr>`
+    html += '</tbody></table></div>'
+    el.innerHTML = html
+  } catch (e) {
+    el.innerHTML = `<div class="empty-state">Gagal memuat: ${e.message}</div>`
+  }
+}
+
+// --- SISWA ---
+async function loadSiswa() {
+  const search = $('siswaSearch').value
+  const lembaga = $('siswaLembaga').value
+  const kelas = $('siswaKelas').value
+  let url = `/siswa?${lembaga ? `lembaga=${lembaga}&` : ''}${search ? `search=${encodeURIComponent(search)}&` : ''}${kelas ? `kelas=${encodeURIComponent(kelas)}` : ''}`
+  try {
+    const data = await api(url)
+    renderSiswa(data)
+  } catch (e) {
+    toast(e.message, 'error')
+  }
+}
+
+function renderSiswa(data) {
+  const tbody = $('siswaTable')
+  if (data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Tidak ada siswa</td></tr>'
+    return
+  }
+  tbody.innerHTML = data.map((s, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td><strong>${s.nama}</strong></td>
+      <td><span class="badge ${s.lembaga === 'MIS' ? 'badge-success' : 'badge-warning'}">${s.lembaga}</span></td>
+      <td>${s.kelas}</td>
+      <td>Rp ${(s.tarifInfaq || 0).toLocaleString('id-ID')}</td>
+      <td>
+        <button class="btn btn-sm btn-outline" onclick="editSiswa(${s.id})">✏️</button>
+        <button class="btn btn-sm btn-danger" onclick="hapusSiswa(${s.id}, '${s.nama.replace(/'/g, "\\'")}')">🗑️</button>
+      </td>
+    </tr>
+  `).join('')
+}
+
+async function loadKelasOptions() {
+  try {
+    const mis = await api('/siswa?lembaga=MIS')
+    const mts = await api('/siswa?lembaga=MTs')
+    const kelas = new Set()
+    ;[...mis, ...mts].forEach((s) => kelas.add(s.kelas))
+    const sel = $('siswaKelas')
+    sel.innerHTML = '<option value="">Semua Kelas</option>'
+    ;[...kelas].sort().forEach((k) => {
+      sel.innerHTML += `<option value="${k}">${k}</option>`
+    })
+  } catch (e) {}
+}
+
+function showTambahSiswa() {
+  modal(`
+    <h2>Tambah Siswa Baru</h2>
+    <div class="form-group">
+      <label>Nama Lengkap</label>
+      <input type="text" id="fSiswaNama" placeholder="Nama siswa">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Lembaga</label>
+        <select id="fSiswaLembaga">
+          <option value="MIS">MIS</option>
+          <option value="MTs">MTs</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Kelas</label>
+        <select id="fSiswaKelas"></select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Tarif Infaq/SPP (Rp)</label>
+      <input type="number" id="fSiswaTarif" placeholder="0">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Batal</button>
+      <button class="btn btn-primary" onclick="simpanSiswa()">Simpan</button>
+    </div>
+  `)
+  const sel = $('fSiswaKelas')
+  const lembaga = $('fSiswaLembaga').value
+  const kelasList = lembaga === 'MIS'
+    ? ['Kelas I', 'Kelas II', 'Kelas III', 'Kelas IV', 'Kelas V', 'Kelas VI']
+    : ['Kelas VII', 'Kelas VIII', 'Kelas IX']
+  kelasList.forEach((k) => { sel.innerHTML += `<option value="${k}">${k}</option>` })
+  $('fSiswaLembaga').onchange = () => {
+    const l = $('fSiswaLembaga').value
+    const k = l === 'MIS'
+      ? ['Kelas I', 'Kelas II', 'Kelas III', 'Kelas IV', 'Kelas V', 'Kelas VI']
+      : ['Kelas VII', 'Kelas VIII', 'Kelas IX']
+    $('fSiswaKelas').innerHTML = k.map((x) => `<option value="${x}">${x}</option>`).join('')
+  }
+}
+
+async function simpanSiswa() {
+  const body = {
+    nama: $('fSiswaNama').value.trim(),
+    lembaga: $('fSiswaLembaga').value,
+    kelas: $('fSiswaKelas').value,
+    tarifInfaq: parseInt($('fSiswaTarif').value) || 0,
+  }
+  if (!body.nama) { toast('Nama harus diisi', 'error'); return }
+  try {
+    await api('/siswa', { method: 'POST', body: JSON.stringify(body) })
+    closeModal()
+    toast('Siswa berhasil ditambahkan')
+    loadSiswa()
+  } catch (e) { toast(e.message, 'error') }
+}
+
+async function editSiswa(id) {
+  const data = await api(`/siswa?id=${id}`)
+  const s = data[0]
+  if (!s) return
+  modal(`
+    <h2>Edit Siswa</h2>
+    <div class="form-group">
+      <label>Nama Lengkap</label>
+      <input type="text" id="fSiswaNama" value="${s.nama}">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Lembaga</label>
+        <select id="fSiswaLembaga">
+          <option value="MIS" ${s.lembaga === 'MIS' ? 'selected' : ''}>MIS</option>
+          <option value="MTs" ${s.lembaga === 'MTs' ? 'selected' : ''}>MTs</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Kelas</label>
+        <select id="fSiswaKelas"></select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Tarif Infaq/SPP (Rp)</label>
+      <input type="number" id="fSiswaTarif" value="${s.tarifInfaq}">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Batal</button>
+      <button class="btn btn-primary" onclick="updateSiswa(${id})">Simpan</button>
+    </div>
+  `)
+  const sel = $('fSiswaKelas')
+  const kelasList = s.lembaga === 'MIS'
+    ? ['Kelas I', 'Kelas II', 'Kelas III', 'Kelas IV', 'Kelas V', 'Kelas VI']
+    : ['Kelas VII', 'Kelas VIII', 'Kelas IX']
+  kelasList.forEach((k) => { sel.innerHTML += `<option value="${k}" ${k === s.kelas ? 'selected' : ''}>${k}</option>` })
+}
+
+async function updateSiswa(id) {
+  const body = {
+    nama: $('fSiswaNama').value.trim(),
+    lembaga: $('fSiswaLembaga').value,
+    kelas: $('fSiswaKelas').value,
+    tarifInfaq: parseInt($('fSiswaTarif').value) || 0,
+  }
+  if (!body.nama) { toast('Nama harus diisi', 'error'); return }
+  try {
+    await api(`/siswa?id=${id}`, { method: 'PUT', body: JSON.stringify(body) })
+    closeModal()
+    toast('Siswa berhasil diupdate')
+    loadSiswa()
+  } catch (e) { toast(e.message, 'error') }
+}
+
+async function hapusSiswa(id, nama) {
+  if (!confirm(`Hapus siswa "${nama}"?`)) return
+  try {
+    await api(`/siswa?id=${id}`, { method: 'DELETE' })
+    toast('Siswa berhasil dihapus')
+    loadSiswa()
+  } catch (e) { toast(e.message, 'error') }
+}
+
+// --- PEMBAYARAN ---
+async function initBayarForm() {
+  const lembaga = $('payLembaga').value
+  try {
+    const kat = await api(`/kategori?lembaga=${lembaga}`)
+    const sel = $('payKategori')
+    sel.innerHTML = '<option value="Infaq">Infaq</option>'
+    kat.forEach((k) => {
+      sel.innerHTML += `<option value="${k.nama}" data-jumlah="${k.jumlahDefault}">${k.nama}</option>`
+    })
+    sel.onchange = () => {
+      const opt = sel.options[sel.selectedIndex]
+      if (opt.dataset.jumlah && opt.dataset.jumlah !== '0') {
+        $('payJumlah').value = opt.dataset.jumlah
+      }
+    }
+  } catch (e) {}
+}
+
+let paySearchTimeout = null
+async function searchSiswaBayar() {
+  clearTimeout(paySearchTimeout)
+  const q = $('paySearch').value.trim()
+  const lembaga = $('payLembaga').value
+
+  if (q.length < 2) {
+    $('paySearchResults').innerHTML = ''
+    $('payForm').classList.add('hidden')
+    return
+  }
+
+  paySearchTimeout = setTimeout(async () => {
+    try {
+      const data = await api(`/siswa?lembaga=${lembaga}&search=${encodeURIComponent(q)}`)
+      if (data.length === 0) {
+        $('paySearchResults').innerHTML = '<div class="empty-state">Siswa tidak ditemukan</div>'
+        return
+      }
+      $('paySearchResults').innerHTML = data.slice(0, 10).map((s) => `
+        <div style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center"
+             onmouseover="this.style.background='#f0f4ff'" onmouseout="this.style.background=''"
+             onclick="pilihSiswaBayar(${s.id}, '${s.nama.replace(/'/g, "\\'")}', '${s.lembaga}', ${s.tarifInfaq})">
+          <span><strong>${s.nama}</strong> — ${s.kelas}</span>
+          <span class="badge ${s.lembaga === 'MIS' ? 'badge-success' : 'badge-warning'}">${s.lembaga}</span>
+        </div>
+      `).join('')
+    } catch (e) {}
+  }, 300)
+}
+
+function pilihSiswaBayar(id, nama, lembaga, tarif) {
+  selectedSiswaId = id
+  $('payNama').value = nama
+  $('payLembagaDisplay').value = lembaga
+  $('payJumlah').value = tarif || ''
+  $('paySearchResults').innerHTML = ''
+  $('paySearch').value = nama
+  $('payForm').classList.remove('hidden')
+}
+
+function batalPembayaran() {
+  selectedSiswaId = null
+  $('payForm').classList.add('hidden')
+  $('paySearch').value = ''
+  $('paySearchResults').innerHTML = ''
+}
+
+async function simpanPembayaran() {
+  if (!selectedSiswaId) { toast('Pilih siswa terlebih dahulu', 'error'); return }
+  const body = {
+    siswaId: selectedSiswaId,
+    bulan: parseInt($('payBulan').value),
+    tahun: parseInt($('payTahun').value),
+    jumlah: parseInt($('payJumlah').value) || 0,
+    kategori: $('payKategori').value,
+    lembaga: $('payLembaga').value,
+    keterangan: $('payKeterangan').value.trim(),
+  }
+  if (body.jumlah <= 0) { toast('Jumlah harus diisi', 'error'); return }
+  try {
+    await api('/pembayaran', { method: 'POST', body: JSON.stringify(body) })
+    toast(`Pembayaran ${body.kategori} untuk ${$('payNama').value} berhasil dicatat`)
+    batalPembayaran()
+    loadRiwayat()
+  } catch (e) { toast(e.message, 'error') }
+}
+
+async function loadRiwayat() {
+  const lembaga = $('riwayatLembaga').value
+  let url = '/pembayaran'
+  if (lembaga) url += `?lembaga=${lembaga}`
+  try {
+    const data = await api(url)
+    const tbody = $('riwayatTable')
+    if (data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Belum ada pembayaran</td></tr>'
+      return
+    }
+
+    const siswaMap = {}
+    try {
+      const all = await api('/siswa')
+      all.forEach((s) => { siswaMap[s.id] = s })
+    } catch (e) {}
+
+    tbody.innerHTML = data.slice(0, 100).map((p) => {
+      const s = siswaMap[p.siswaId] || {}
+      return `<tr>
+        <td>${p.tanggal}</td>
+        <td><strong>${s.nama || 'ID: ' + p.siswaId}</strong></td>
+        <td><span class="badge ${p.lembaga === 'MIS' ? 'badge-success' : 'badge-warning'}">${p.lembaga}</span></td>
+        <td>${BULAN_NAMES[p.bulan - 1] || p.bulan}</td>
+        <td>${p.tahun}</td>
+        <td>${p.kategori}</td>
+        <td><strong>Rp ${(p.jumlah || 0).toLocaleString('id-ID')}</strong></td>
+        <td><button class="btn btn-sm btn-danger" onclick="hapusPembayaran(${p.id})">🗑️</button></td>
+      </tr>`
+    }).join('')
+  } catch (e) { toast(e.message, 'error') }
+}
+
+async function hapusPembayaran(id) {
+  if (!confirm('Hapus pembayaran ini?')) return
+  try {
+    await api(`/pembayaran?id=${id}`, { method: 'DELETE' })
+    toast('Pembayaran berhasil dihapus')
+    loadRiwayat()
+  } catch (e) { toast(e.message, 'error') }
+}
+
+// --- KATEGORI ---
+async function loadKategori() {
+  try {
+    const data = await api('/kategori')
+    const tbody = $('kategoriTable')
+    if (data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Belum ada kategori</td></tr>'
+      return
+    }
+    tbody.innerHTML = data.map((k) => `
+      <tr>
+        <td><strong>${k.nama}</strong></td>
+        <td><span class="badge ${k.lembaga === 'MIS' ? 'badge-success' : 'badge-warning'}">${k.lembaga}</span></td>
+        <td>Rp ${(k.jumlahDefault || 0).toLocaleString('id-ID')}</td>
+        <td><button class="btn btn-sm btn-danger" onclick="hapusKategori(${k.id}, '${k.nama.replace(/'/g, "\\'")}')">🗑️</button></td>
+      </tr>
+    `).join('')
+  } catch (e) { toast(e.message, 'error') }
+}
+
+function showTambahKategori() {
+  modal(`
+    <h2>Tambah Kategori</h2>
+    <div class="form-group">
+      <label>Nama Kategori</label>
+      <input type="text" id="fKatNama" placeholder="Contoh: SPP, Infaq, Seragam, dll">
+    </div>
+    <div class="form-group">
+      <label>Lembaga</label>
+      <select id="fKatLembaga">
+        <option value="MIS">MIS</option>
+        <option value="MTs">MTs</option>
+        <option value="">Semua</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Jumlah Default (Rp)</label>
+      <input type="number" id="fKatJumlah" placeholder="0">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Batal</button>
+      <button class="btn btn-primary" onclick="simpanKategori()">Simpan</button>
+    </div>
+  `)
+}
+
+async function simpanKategori() {
+  const body = {
+    nama: $('fKatNama').value.trim(),
+    lembaga: $('fKatLembaga').value,
+    jumlahDefault: parseInt($('fKatJumlah').value) || 0,
+  }
+  if (!body.nama) { toast('Nama kategori harus diisi', 'error'); return }
+  try {
+    await api('/kategori', { method: 'POST', body: JSON.stringify(body) })
+    closeModal()
+    toast('Kategori berhasil ditambahkan')
+    loadKategori()
+  } catch (e) { toast(e.message, 'error') }
+}
+
+async function hapusKategori(id, nama) {
+  if (!confirm(`Hapus kategori "${nama}"?`)) return
+  try {
+    await api(`/kategori?id=${id}`, { method: 'DELETE' })
+    toast('Kategori berhasil dihapus')
+    loadKategori()
+  } catch (e) { toast(e.message, 'error') }
+}
+
+// --- PAUD ---
+async function loadPaud() {
+  const search = $('paudSearch').value
+  let url = '/paud'
+  if (search) url += `?search=${encodeURIComponent(search)}`
+  try {
+    const data = await api(url)
+    const tbody = $('paudTable')
+    if (data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Belum ada data siswa PAUD</td></tr>'
+      return
+    }
+    tbody.innerHTML = data.map((s, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td><strong>${s.nama}</strong></td>
+        <td>Rp ${(s.tarif || 0).toLocaleString('id-ID')}</td>
+        <td>
+          <button class="btn btn-sm btn-outline" onclick="editPaud(${s.id})">✏️</button>
+          <button class="btn btn-sm btn-danger" onclick="hapusPaud(${s.id}, '${s.nama.replace(/'/g, "\\'")}')">🗑️</button>
+        </td>
+      </tr>
+    `).join('')
+  } catch (e) { toast(e.message, 'error') }
+}
+
+function showTambahPaud() {
+  modal(`
+    <h2>Tambah Siswa PAUD</h2>
+    <div class="form-group">
+      <label>Nama Lengkap</label>
+      <input type="text" id="fPaudNama" placeholder="Nama siswa PAUD">
+    </div>
+    <div class="form-group">
+      <label>Tarif (Rp)</label>
+      <input type="number" id="fPaudTarif" placeholder="0">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Batal</button>
+      <button class="btn btn-primary" onclick="simpanPaud()">Simpan</button>
+    </div>
+  `)
+}
+
+async function simpanPaud() {
+  const body = {
+    nama: $('fPaudNama').value.trim(),
+    tarif: parseInt($('fPaudTarif').value) || 0,
+  }
+  if (!body.nama) { toast('Nama harus diisi', 'error'); return }
+  try {
+    await api('/paud', { method: 'POST', body: JSON.stringify(body) })
+    closeModal()
+    toast('Siswa PAUD berhasil ditambahkan')
+    loadPaud()
+  } catch (e) { toast(e.message, 'error') }
+}
+
+async function editPaud(id) {
+  const data = await api(`/paud?id=${id}`)
+  const s = data[0]
+  if (!s) return
+  modal(`
+    <h2>Edit Siswa PAUD</h2>
+    <div class="form-group">
+      <label>Nama Lengkap</label>
+      <input type="text" id="fPaudNama" value="${s.nama}">
+    </div>
+    <div class="form-group">
+      <label>Tarif (Rp)</label>
+      <input type="number" id="fPaudTarif" value="${s.tarif || 0}">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Batal</button>
+      <button class="btn btn-primary" onclick="updatePaud(${id})">Simpan</button>
+    </div>
+  `)
+}
+
+async function updatePaud(id) {
+  const body = {
+    nama: $('fPaudNama').value.trim(),
+    tarif: parseInt($('fPaudTarif').value) || 0,
+  }
+  if (!body.nama) { toast('Nama harus diisi', 'error'); return }
+  try {
+    await api(`/paud?id=${id}`, { method: 'PUT', body: JSON.stringify(body) })
+    closeModal()
+    toast('Siswa PAUD berhasil diupdate')
+    loadPaud()
+  } catch (e) { toast(e.message, 'error') }
+}
+
+async function hapusPaud(id, nama) {
+  if (!confirm(`Hapus siswa PAUD "${nama}"?`)) return
+  try {
+    await api(`/paud?id=${id}`, { method: 'DELETE' })
+    toast('Siswa PAUD berhasil dihapus')
+    loadPaud()
+  } catch (e) { toast(e.message, 'error') }
+}
+</script>
+</body>
+</html>

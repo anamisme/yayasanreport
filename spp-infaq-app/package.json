@@ -1,0 +1,14 @@
+{
+  "name": "spp-infaq-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Aplikasi pencatatan SPP/Infaq untuk MIS & MTs",
+  "scripts": {
+    "dev": "wrangler pages dev public --bindings",
+    "deploy": "wrangler pages deploy public",
+    "build": "echo 'Static site, no build needed'"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

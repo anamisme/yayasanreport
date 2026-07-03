@@ -1,0 +1,8 @@
+node_modules/
+.env
+*.key
+*.pem
+.DS_Store
+*.log
+siswa_paud.json
+process_siswa.py
