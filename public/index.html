@@ -269,7 +269,7 @@ tr:hover { background: #f8faff; }
       <canvas id="chartPayment"></canvas>
     </div>
   </div>
-  <div class="grid-2">
+  <div class="grid-3">
     <div class="card">
       <h2>Total Pemasukan per Bulan</h2>
       <div class="chart-container">
@@ -277,9 +277,22 @@ tr:hover { background: #f8faff; }
       </div>
     </div>
     <div class="card">
-      <h2>Belum Bayar (Bulan Ini)</h2>
-      <div id="unpaidList"></div>
+      <h2>Cash vs QRIS per Bulan</h2>
+      <div class="chart-container">
+        <canvas id="chartMetode"></canvas>
+      </div>
     </div>
+    <div class="card">
+      <h2>Cash vs QRIS (Total)</h2>
+      <div class="chart-container" style="height:250px">
+        <canvas id="chartMetodePie"></canvas>
+      </div>
+      <div id="metodeStats" style="text-align:center;margin-top:8px;font-size:13px;color:var(--text-secondary)"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Belum Bayar (Bulan Ini)</h2>
+    <div id="unpaidList"></div>
   </div>
 </div>
 
@@ -456,6 +469,8 @@ const MONTH_MAP = { Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12,Jan:1,Feb:2,Mar:3,Apr
 
 let paymentChart = null
 let incomeChart = null
+let metodeChart = null
+let metodePieChart = null
 let selectedSiswa = null
 let selectedPayments = {}
 
@@ -569,6 +584,7 @@ function renderDashboard(data) {
 
   renderPaymentChart(stats)
   renderIncomeChart(stats)
+  renderMetodeChart(stats, data)
   loadUnpaidList(data.lembaga)
 }
 
@@ -611,6 +627,51 @@ function renderIncomeChart(stats) {
       scales: { y: { beginAtZero: true, ticks: { callback: (v) => 'Rp ' + v.toLocaleString('id-ID') } } },
     },
   })
+}
+
+function renderMetodeChart(stats, data) {
+  // Stacked bar per month
+  const ctx = document.getElementById('chartMetode').getContext('2d')
+  if (metodeChart) metodeChart.destroy()
+  metodeChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: stats.map(s => s.bulanNama),
+      datasets: [
+        { label: 'QRIS', data: stats.map(s => s.qrisTotal), backgroundColor: '#0f9d58', borderRadius: 4 },
+        { label: 'Cash', data: stats.map(s => s.cashTotal), backgroundColor: '#f4b400', borderRadius: 4 },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { callback: v => 'Rp ' + v.toLocaleString('id-ID') } } },
+    },
+  })
+
+  // Doughnut total
+  const ctx2 = document.getElementById('chartMetodePie').getContext('2d')
+  if (metodePieChart) metodePieChart.destroy()
+  const tc = data.totalCash || 0, tq = data.totalQris || 0
+  metodePieChart = new Chart(ctx2, {
+    type: 'doughnut',
+    data: {
+      labels: ['Cash', 'QRIS'],
+      datasets: [{ data: [tc, tq], backgroundColor: ['#f4b400', '#0f9d58'], borderWidth: 0 }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom' },
+        tooltip: { callbacks: { label: ctx => ctx.label + ': Rp ' + ctx.raw.toLocaleString('id-ID') } },
+      },
+    },
+  })
+
+  $('metodeStats').innerHTML = `
+    Cash: <strong>Rp ${tc.toLocaleString('id-ID')}</strong> (${data.cashCount || 0} transaksi)
+    &nbsp;|&nbsp;
+    QRIS: <strong>Rp ${tq.toLocaleString('id-ID')}</strong> (${data.qrisCount || 0} transaksi)
+  `
 }
 
 async function loadUnpaidList(lembaga) {

@@ -25,34 +25,40 @@ export async function onRequest(context) {
     const values = data.values || []
     const headersRow = values[0] || []
 
-    const bulanNames = BULAN_NAMES
+    let totalCash = 0, totalQris = 0
+    let cashCount = 0, qrisCount = 0
 
-    // Find month columns for the given year
-    const monthly = bulanNames.map((name, idx) => {
+    const monthly = BULAN_NAMES.map((name, idx) => {
       const bulan = idx + 1
       let mi = null
       if (tahun === 2026 && bulan >= 7) mi = bulan - 7
       else if (tahun === 2027 && bulan <= 6) mi = bulan + 5
       if (mi === null || mi >= MONTH_HEADERS.length) {
-        return { bulan, bulanNama: name, totalSiswa: 0, paidCount: 0, unpaidCount: 0, percentage: 0, totalBayar: 0, aktif: false }
+        return { bulan, bulanNama: name, totalSiswa: 0, paidCount: 0, unpaidCount: 0, percentage: 0, totalBayar: 0, cashTotal: 0, qrisTotal: 0, cashCount: 0, qrisCount: 0, aktif: false }
       }
       const colIdx = headersRow.indexOf(MONTH_HEADERS[mi])
       const totalSiswa = values.length - 1
-      let paidCount = 0
-      let totalBayar = 0
+      let paidCount = 0, totalBayar = 0
+      let mCash = 0, mQris = 0, cCash = 0, cQris = 0
       for (let i = 1; i < values.length; i++) {
         const val = colIdx >= 0 ? (values[i][colIdx] || '') : ''
         if (val) {
           paidCount++
-          const num = parseInt(val.replace(/\D/g, '')) || 0
+          const parts = val.match(/Lunas\s*Rp(\d+)\s*(Cash|QRIS)/i)
+          const num = parts ? parseInt(parts[1]) : (parseInt(val.replace(/\D/g, '')) || 0)
+          const metode = parts ? parts[2] : 'Cash'
           totalBayar += num
+          if (metode === 'QRIS') { mQris += num; cQris++ }
+          else { mCash += num; cCash++ }
         }
       }
+      totalCash += mCash; totalQris += mQris
+      cashCount += cCash; qrisCount += cQris
       return {
         bulan, bulanNama: name, totalSiswa, paidCount,
         unpaidCount: totalSiswa - paidCount,
         percentage: totalSiswa > 0 ? Math.round((paidCount / totalSiswa) * 100) : 0,
-        totalBayar, aktif: true,
+        totalBayar, cashTotal: mCash, qrisTotal: mQris, cashCount: cCash, qrisCount: cQris, aktif: true,
       }
     })
 
@@ -62,7 +68,7 @@ export async function onRequest(context) {
     return new Response(JSON.stringify({
       tahun, lembaga,
       totalSiswa: Math.max(0, values.length - 1),
-      totalPemasukan,
+      totalPemasukan, totalCash, totalQris, cashCount, qrisCount,
       monthly: filtered,
     }), { headers })
   } catch (err) {
