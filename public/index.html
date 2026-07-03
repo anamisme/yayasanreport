@@ -246,6 +246,7 @@ tr:hover { background: #f8faff; }
   <button data-tab="bayar">💰 Pembayaran</button>
   <button data-tab="siswa">👥 Siswa</button>
   <button data-tab="kategori">🏷️ Kategori</button>
+  <button data-tab="laporan">📋 Laporan</button>
 </div>
 
 <div class="container" id="app">
@@ -448,6 +449,52 @@ tr:hover { background: #f8faff; }
   </div>
 </div>
 
+<div id="tab-laporan" class="tab-content hidden">
+  <div class="flex-between mb-2">
+    <h2>Laporan Tunggakan</h2>
+    <div>
+      <button class="btn btn-success" onclick="downloadLaporanCSV()">⬇ Download CSV</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="form-row" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+      <select id="lapLembaga" onchange="loadLaporan()" style="width:auto;min-width:120px">
+        <option value="MIS">MIS</option>
+        <option value="MTs">MTs</option>
+        <option value="PAUD">PAUD</option>
+      </select>
+      <select id="lapKelas" onchange="loadLaporan()" style="width:auto;min-width:140px">
+        <option value="">Semua Kelas</option>
+      </select>
+      <select id="lapBulanAwal" onchange="loadLaporan()" style="width:auto;min-width:120px">
+      </select>
+      <select id="lapBulanAkhir" onchange="loadLaporan()" style="width:auto;min-width:120px">
+      </select>
+      <select id="lapTahun" onchange="loadLaporan()" style="width:auto;min-width:100px">
+      </select>
+      <label style="display:flex;align-items:center;gap:4px;font-size:13px">
+        <input type="checkbox" id="lapUnpaidOnly" checked onchange="loadLaporan()"> Hanya tunggakan
+      </label>
+    </div>
+    <div id="lapSummary" style="margin-bottom:12px;font-size:13px;color:var(--text-secondary)"></div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Nama</th>
+            <th>Kelas</th>
+            <th>Nominal</th>
+            <th id="lapMonthHeaders"></th>
+            <th>Total Tunggakan</th>
+          </tr>
+        </thead>
+        <tbody id="lapTable"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 </div>
 
 <div id="modal" class="modal hidden">
@@ -513,6 +560,7 @@ document.querySelectorAll('.tab-nav button').forEach((btn) => {
     if (btn.dataset.tab === 'bayar') { loadRiwayat(); initBayarForm() }
     if (btn.dataset.tab === 'siswa') loadSiswa()
     if (btn.dataset.tab === 'kategori') loadKategori()
+    if (btn.dataset.tab === 'laporan') loadLaporan()
   }
 })
 
@@ -529,6 +577,14 @@ function init() {
   for (let y = 2026; y <= 2027; y++) {
     tahunSel.innerHTML += `<option value="${y}">${y}</option>`
   }
+  // Laporan filters
+  for (let y = 2026; y <= 2027; y++) {
+    $('lapTahun').innerHTML += `<option value="${y}">${y}</option>`
+  }
+  BULAN_NAMES.forEach((n, i) => {
+    $('lapBulanAwal').innerHTML += `<option value="${i + 1}" ${i + 1 === 7 ? 'selected' : ''}>${n}</option>`
+    $('lapBulanAkhir').innerHTML += `<option value="${i + 1}" ${i + 1 === 12 ? 'selected' : ''}>${n}</option>`
+  })
   loadDashboard()
 }
 
@@ -1141,6 +1197,100 @@ async function hapusKategori(id, nama) {
     toast('Kategori berhasil dihapus')
     loadKategori()
   } catch (e) { toast(e.message, 'error') }
+}
+
+// --- LAPORAN ---
+async function loadLaporan() {
+  const lembaga = $('lapLembaga').value
+  const kelas = $('lapKelas').value
+  const bulanAwal = $('lapBulanAwal').value
+  const bulanAkhir = $('lapBulanAkhir').value
+  const tahun = $('lapTahun').value
+  const unpaidOnly = $('lapUnpaidOnly').checked
+
+  // Update kelas dropdown
+  if (lembaga === 'PAUD') {
+    $('lapKelas').innerHTML = '<option value="">PAUD</option>'
+    $('lapKelas').disabled = true
+  } else {
+    $('lapKelas').disabled = false
+    const order = lembaga === 'MIS'
+      ? ['Kelas I','Kelas II','Kelas III','Kelas IV','Kelas V','Kelas VI']
+      : ['Kelas VII','Kelas VIII','Kelas IX']
+    if ($('lapKelas').options.length <= 1 || $('lapKelas').dataset.lembaga !== lembaga) {
+      $('lapKelas').dataset.lembaga = lembaga
+      $('lapKelas').innerHTML = '<option value="">Semua Kelas</option>' +
+        order.map(k => `<option value="${k}">${k}</option>`).join('')
+    }
+  }
+
+  try {
+    const params = new URLSearchParams({
+      lembaga, kelas, bulanAwal, bulanAkhir, tahun,
+      unpaidOnly: unpaidOnly ? 'true' : 'false'
+    })
+    const data = await api(`/laporan?${params}`)
+    if (!data || !data.siswa) throw new Error('Gagal memuat laporan')
+
+    // Summary
+    $('lapSummary').textContent = `Menampilkan ${data.unpaidSiswa} dari ${data.totalSiswa} siswa dengan tunggakan`
+
+    // Month headers
+    const monthLabels = data.months.map(m => {
+      const parts = m.split(' ')
+      return parts[0]
+    })
+    $('lapMonthHeaders').innerHTML = monthLabels.map(m => `<th>${m}</th>`).join('')
+
+    // Table rows
+    const tbody = $('lapTable')
+    if (data.siswa.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="999" class="empty-state">Semua siswa sudah lunas ✅</td></tr>'
+      return
+    }
+
+    // Store for CSV
+    window._lapData = data
+
+    tbody.innerHTML = data.siswa.map((s, i) => {
+      const paymentCells = data.months.map(m => {
+        const paid = s.payments[m]
+        return paid ? `<td style="color:var(--success);text-align:center">✅</td>` : `<td style="color:var(--danger);text-align:center">❌</td>`
+      }).join('')
+      return `<tr>
+        <td>${i + 1}</td>
+        <td><strong>${s.nama}</strong></td>
+        <td>${s.kelas || '-'}</td>
+        <td>Rp ${(s.nominalInfaq || 0).toLocaleString('id-ID')}</td>
+        ${paymentCells}
+        <td style="color:var(--danger);font-weight:600">Rp ${(s.totalUnpaidNominal || 0).toLocaleString('id-ID')}</td>
+      </tr>`
+    }).join('')
+  } catch (e) { toast(e.message, 'error') }
+}
+
+function downloadLaporanCSV() {
+  const data = window._lapData
+  if (!data || !data.siswa || data.siswa.length === 0) {
+    toast('Tidak ada data untuk di-download', 'error')
+    return
+  }
+
+  const months = data.months
+  const rows = [['Nama','Kelas','Nominal', ...months.map(m => m.split(' ')[0]), 'Total Tunggakan']]
+  data.siswa.forEach(s => {
+    const payments = months.map(m => s.payments[m] ? 'Lunas' : 'Belum')
+    rows.push([s.nama, s.kelas || '-', s.nominalInfaq || 0, ...payments, s.totalUnpaidNominal || 0])
+  })
+
+  const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n')
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' })
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = `tunggakan_${data.lembaga}_${data.bulanAwal}-${data.bulanAkhir}_${data.tahun}.csv`
+  a.click()
+  URL.revokeObjectURL(a.href)
+  toast('Laporan berhasil di-download')
 }
 </script>
 </body>
