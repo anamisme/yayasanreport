@@ -91,11 +91,32 @@ export async function updateSheet(token, sheetId, range, values) {
   return resp.json()
 }
 
+export const SHEET_NAMES = ['MIS', 'MTs', 'PAUD']
+
+export const MONTH_HEADERS = [
+  'Jul 2026','Aug 2026','Sep 2026','Oct 2026','Nov 2026','Dec 2026',
+  'Jan 2027','Feb 2027','Mar 2027','Apr 2027','May 2027','Jun 2027',
+]
+
+export function getMonthIdx(bulan, tahun) {
+  return (tahun - 2026) * 12 + (bulan - 7)
+}
+
+export async function getSheetId(token, sheetId, sheetName) {
+  const info = await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}`)).json()
+  const s = (info.sheets || []).find(s => s.properties.title === sheetName)
+  return s ? s.properties.sheetId : null
+}
+
 export async function deleteSheetRow(token, sheetId, sheetName, rowIndex) {
+  const info = await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}`)).json()
+  const s = (info.sheets || []).find(sh => sh.properties.title === sheetName)
+  if (!s) throw new Error(`Sheet "${sheetName}" not found`)
+  const gid = s.properties.sheetId
   const requests = [{
     deleteDimension: {
       range: {
-        sheetId: 0,
+        sheetId: gid,
         dimension: 'ROWS',
         startIndex: rowIndex,
         endIndex: rowIndex + 1,

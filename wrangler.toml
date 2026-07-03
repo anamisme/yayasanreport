@@ -2,8 +2,4 @@ name = "spp-infaq-app"
 compatibility_date = "2026-07-01"
 pages_build_output_dir = "public"
 
-[vars]
-GOOGLE_SHEET_ID = "YOUR_GOOGLE_SHEET_ID_HERE"
-GOOGLE_SERVICE_ACCOUNT_EMAIL = "YOUR_SERVICE_ACCOUNT_EMAIL_HERE"
-
 

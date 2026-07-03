@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SPP & Infaq - MIS & MTs</title>
+<title>SPP & Infaq - MIS & MTs & PAUD</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
 :root {
@@ -164,6 +164,7 @@ tr:hover { background: #f8faff; }
 .badge-success { background: #e6f4ea; color: var(--success); }
 .badge-danger { background: #fce8e6; color: var(--danger); }
 .badge-warning { background: #fef7e0; color: var(--warning); }
+.badge-paud { background: #e8f0fe; color: var(--primary); }
 .mt-2 { margin-top: 16px; }
 .mb-2 { margin-bottom: 16px; }
 .text-right { text-align: right; }
@@ -227,7 +228,7 @@ tr:hover { background: #f8faff; }
 <div class="topbar">
   <div>
     <h1>SPP & Infaq</h1>
-    <div class="sub">MIS Baitul Hikmah / MTs Baitul Hikmah</div>
+    <div class="sub">MIS / MTs / PAUD Baitul Hikmah</div>
   </div>
   <div>
     <button class="btn btn-outline btn-sm" style="color:white;border-color:rgba(255,255,255,0.3)" onclick="refreshAll()">🔄 Muat Ulang</button>
@@ -239,7 +240,6 @@ tr:hover { background: #f8faff; }
   <button data-tab="bayar">💰 Pembayaran</button>
   <button data-tab="siswa">👥 Siswa</button>
   <button data-tab="kategori">🏷️ Kategori</button>
-  <button data-tab="paud">🎒 PAUD</button>
 </div>
 
 <div class="container" id="app">
@@ -250,6 +250,7 @@ tr:hover { background: #f8faff; }
       <select id="dashLembaga" onchange="loadDashboard()">
         <option value="MIS">MIS</option>
         <option value="MTs">MTs</option>
+        <option value="PAUD">PAUD</option>
       </select>
       <select id="dashTahun" onchange="loadDashboard()" style="width:auto;margin-left:8px">
       </select>
@@ -270,7 +271,7 @@ tr:hover { background: #f8faff; }
       </div>
     </div>
     <div class="card">
-      <h2>Siswa Belum Bayar (Bulan Ini)</h2>
+      <h2>Belum Bayar (Bulan Ini)</h2>
       <div id="unpaidList"></div>
     </div>
   </div>
@@ -284,6 +285,7 @@ tr:hover { background: #f8faff; }
       <select id="payLembaga" onchange="searchSiswaBayar()">
         <option value="MIS">MIS</option>
         <option value="MTs">MTs</option>
+        <option value="PAUD">PAUD</option>
       </select>
     </div>
     <div id="paySearchResults" class="mb-2"></div>
@@ -309,22 +311,18 @@ tr:hover { background: #f8faff; }
           <select id="payTahun"></select>
         </div>
       </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Kategori</label>
-          <select id="payKategori"></select>
-        </div>
-        <div class="form-group">
-          <label>Jumlah (Rp)</label>
-          <input type="number" id="payJumlah">
-        </div>
+      <div id="payKelasRow" class="form-group hidden">
+        <label>Kelas</label>
+        <input type="text" id="payKelas" readonly>
       </div>
       <div class="form-group">
-        <label>Keterangan (opsional)</label>
-        <input type="text" id="payKeterangan" placeholder="Misal: Lunas bulan ini">
+        <label>Status</label>
+        <div id="payMonthGrid" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px"></div>
       </div>
-      <button class="btn btn-success" onclick="simpanPembayaran()">💾 Simpan Pembayaran</button>
-      <button class="btn btn-outline" onclick="batalPembayaran()">Batal</button>
+      <div style="margin-top:12px">
+        <button class="btn btn-success" onclick="simpanPembayaran()">✅ Tandai Lunas</button>
+        <button class="btn btn-danger" onclick="batalPembayaran()">Batal</button>
+      </div>
     </div>
   </div>
 
@@ -336,6 +334,7 @@ tr:hover { background: #f8faff; }
           <option value="">Semua</option>
           <option value="MIS">MIS</option>
           <option value="MTs">MTs</option>
+          <option value="PAUD">PAUD</option>
         </select>
       </div>
     </div>
@@ -348,7 +347,6 @@ tr:hover { background: #f8faff; }
             <th>Lembaga</th>
             <th>Bulan</th>
             <th>Tahun</th>
-            <th>Kategori</th>
             <th>Jumlah</th>
             <th>Aksi</th>
           </tr>
@@ -370,6 +368,7 @@ tr:hover { background: #f8faff; }
       <option value="">Semua Lembaga</option>
       <option value="MIS">MIS</option>
       <option value="MTs">MTs</option>
+      <option value="PAUD">PAUD</option>
     </select>
     <select id="siswaKelas" onchange="loadSiswa()">
       <option value="">Semua Kelas</option>
@@ -384,7 +383,7 @@ tr:hover { background: #f8faff; }
             <th>Nama</th>
             <th>Lembaga</th>
             <th>Kelas</th>
-            <th>Tarif</th>
+            <th>Nominal</th>
             <th>Aksi</th>
           </tr>
         </thead>
@@ -418,38 +417,6 @@ tr:hover { background: #f8faff; }
 
 </div>
 
-<div id="tab-paud" class="tab-content hidden">
-  <div class="flex-between mb-2">
-    <h2>Data Siswa PAUD</h2>
-    <button class="btn btn-primary" onclick="showTambahPaud()">+ Tambah Siswa PAUD</button>
-  </div>
-  <div class="card" style="border-left:4px solid var(--warning)">
-    <div class="flex-between">
-      <div>
-        <p style="color:var(--text-secondary);font-size:13px">PAUD dikelola terpisah dari siswa MIS/MTs reguler.</p>
-      </div>
-    </div>
-  </div>
-  <div class="search-box">
-    <input type="text" id="paudSearch" placeholder="Cari nama siswa PAUD..." oninput="loadPaud()">
-  </div>
-  <div class="card">
-    <div style="overflow-x:auto">
-      <table>
-        <thead>
-          <tr>
-            <th>No</th>
-            <th>Nama</th>
-            <th>Tarif</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody id="paudTable"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
 <div id="modal" class="modal hidden">
   <div class="modal-content" id="modalBody"></div>
 </div>
@@ -462,10 +429,17 @@ const BULAN_NAMES = [
   'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
 ]
 
+const MONTH_HEADERS = [
+  'Jul 2026','Aug 2026','Sep 2026','Oct 2026','Nov 2026','Dec 2026',
+  'Jan 2027','Feb 2027','Mar 2027','Apr 2027','May 2027','Jun 2027',
+]
+
+const LEMBAGA_LIST = ['MIS', 'MTs', 'PAUD']
+
 let paymentChart = null
 let incomeChart = null
-let selectedSiswaId = null
-let allSiswaCache = {}
+let selectedSiswa = null
+let selectedPayments = {}
 
 function toast(msg, type = 'success') {
   const t = document.createElement('div')
@@ -490,7 +464,6 @@ $('modal').onclick = (e) => {
   if (e.target === $('modal')) closeModal()
 }
 
-// Tab navigation
 document.querySelectorAll('.tab-nav button').forEach((btn) => {
   btn.onclick = () => {
     document.querySelectorAll('.tab-nav button').forEach((b) => b.classList.remove('active'))
@@ -501,27 +474,24 @@ document.querySelectorAll('.tab-nav button').forEach((btn) => {
     if (btn.dataset.tab === 'bayar') { loadRiwayat(); initBayarForm() }
     if (btn.dataset.tab === 'siswa') loadSiswa()
     if (btn.dataset.tab === 'kategori') loadKategori()
-    if (btn.dataset.tab === 'paud') loadPaud()
   }
 })
 
-// Init
 function init() {
   const year = new Date().getFullYear()
   const ySel = $('dashTahun')
-  for (let y = year; y >= year - 5; y--) {
-    ySel.innerHTML += `<option value="${y}">${y}</option>`
+  for (let y = 2026; y <= 2027; y++) {
+    ySel.innerHTML += `<option value="${y}" ${y === year || y === 2026 ? 'selected' : ''}>${y}</option>`
   }
   const bulanSel = $('payBulan')
   BULAN_NAMES.forEach((n, i) => {
     bulanSel.innerHTML += `<option value="${i + 1}" ${i === new Date().getMonth() ? 'selected' : ''}>${n}</option>`
   })
   const tahunSel = $('payTahun')
-  for (let y = year; y >= year - 5; y--) {
-    tahunSel.innerHTML += `<option value="${y}" ${y === year ? 'selected' : ''}>${y}</option>`
+  for (let y = 2026; y <= 2027; y++) {
+    tahunSel.innerHTML += `<option value="${y}" ${y === year || y === 2026 ? 'selected' : ''}>${y}</option>`
   }
   loadDashboard()
-  loadKelasOptions()
 }
 
 document.addEventListener('DOMContentLoaded', init)
@@ -544,6 +514,12 @@ async function refreshAll() {
   toast('Data diperbarui')
 }
 
+function badgeLembaga(l) {
+  if (l === 'MIS') return '<span class="badge badge-success">MIS</span>'
+  if (l === 'MTs') return '<span class="badge badge-warning">MTs</span>'
+  return '<span class="badge badge-paud">PAUD</span>'
+}
+
 // --- DASHBOARD ---
 async function loadDashboard() {
   const lembaga = $('dashLembaga').value
@@ -557,9 +533,9 @@ async function loadDashboard() {
 }
 
 function renderDashboard(data) {
-  const stats = data.monthly
+  const stats = data.monthly.filter(m => m.aktif)
   const now = new Date().getMonth()
-  const thisMonth = stats[now]
+  const thisMonth = stats.find(m => m.bulan === now + 1)
 
   $('dashStats').innerHTML = `
     <div class="stat-box"><div class="value">${data.totalSiswa}</div><div class="label">Total Siswa</div></div>
@@ -570,7 +546,7 @@ function renderDashboard(data) {
 
   renderPaymentChart(stats)
   renderIncomeChart(stats)
-  renderUnpaidList(stats, now, data.lembaga)
+  loadUnpaidList(data.lembaga)
 }
 
 function renderPaymentChart(stats) {
@@ -581,34 +557,13 @@ function renderPaymentChart(stats) {
     data: {
       labels: stats.map((s) => s.bulanNama),
       datasets: [
-        {
-          label: 'Lunas',
-          data: stats.map((s) => s.paidCount),
-          backgroundColor: '#0f9d58',
-          borderRadius: 4,
-        },
-        {
-          label: 'Belum Bayar',
-          data: stats.map((s) => s.unpaidCount),
-          backgroundColor: '#ea4335',
-          borderRadius: 4,
-        },
+        { label: 'Lunas', data: stats.map((s) => s.paidCount), backgroundColor: '#0f9d58', borderRadius: 4 },
+        { label: 'Belum Bayar', data: stats.map((s) => s.unpaidCount), backgroundColor: '#ea4335', borderRadius: 4 },
       ],
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: { stacked: true },
-        y: { stacked: true, beginAtZero: true },
-      },
-      plugins: {
-        tooltip: {
-          callbacks: {
-            label: (ctx) => `${ctx.dataset.label}: ${ctx.raw} siswa (${Math.round(ctx.raw / (ctx.raw + ctx.dataset.data[ctx.dataIndex === 0 ? 1 : 0]) * 100) || 0}%)`,
-          },
-        },
-      },
+      responsive: true, maintainAspectRatio: false,
+      scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
     },
   })
 }
@@ -620,61 +575,39 @@ function renderIncomeChart(stats) {
     type: 'line',
     data: {
       labels: stats.map((s) => s.bulanNama),
-      datasets: [
-        {
-          label: 'Pemasukan (Rp)',
-          data: stats.map((s) => s.totalBayar),
-          borderColor: '#1a73e8',
-          backgroundColor: 'rgba(26,115,232,0.1)',
-          fill: true,
-          tension: 0.3,
-          pointRadius: 4,
-          pointBackgroundColor: '#1a73e8',
-        },
-      ],
+      datasets: [{
+        label: 'Pemasukan (Rp)',
+        data: stats.map((s) => s.totalBayar),
+        borderColor: '#1a73e8',
+        backgroundColor: 'rgba(26,115,232,0.1)',
+        fill: true, tension: 0.3, pointRadius: 4, pointBackgroundColor: '#1a73e8',
+      }],
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: { callback: (v) => 'Rp ' + v.toLocaleString('id-ID') },
-        },
-      },
-      plugins: {
-        tooltip: {
-          callbacks: {
-            label: (ctx) => 'Rp ' + ctx.raw.toLocaleString('id-ID'),
-          },
-        },
-      },
+      responsive: true, maintainAspectRatio: false,
+      scales: { y: { beginAtZero: true, ticks: { callback: (v) => 'Rp ' + v.toLocaleString('id-ID') } } },
     },
   })
 }
 
-async function renderUnpaidList(stats, monthIdx, lembaga) {
-  const bulan = monthIdx + 1
-  const tahun = parseInt($('dashTahun').value)
+async function loadUnpaidList(lembaga) {
   const el = $('unpaidList')
   try {
-    const siswa = await api(`/siswa?lembaga=${lembaga}`)
-    const payments = await api(`/pembayaran?lembaga=${lembaga}&bulan=${bulan}&tahun=${tahun}`)
-    const paidIds = new Set(payments.map((p) => p.siswaId))
-    const unpaid = siswa.filter((s) => !paidIds.has(s.id))
+    const data = await api(`/siswa?lembaga=${lembaga}`)
+    const bulan = new Date().getMonth() + 1
+    const tahun = new Date().getFullYear()
+    const mi = (tahun - 2026) * 12 + (bulan - 7)
+    const header = MONTH_HEADERS[mi]
+    const unpaid = data.filter(s => !s.payments[header])
 
     if (unpaid.length === 0) {
       el.innerHTML = '<div class="empty-state">✅ Semua siswa sudah membayar!</div>'
       return
     }
-
-    let html = '<div style="max-height:250px;overflow-y:auto"><table><thead><tr><th>Nama</th><th>Kelas</th></tr></thead><tbody>'
-    unpaid.slice(0, 50).forEach((s) => {
-      html += `<tr><td>${s.nama}</td><td>${s.kelas}</td></tr>`
-    })
-    if (unpaid.length > 50) html += `<tr><td colspan="2">...dan ${unpaid.length - 50} lainnya</td></tr>`
-    html += '</tbody></table></div>'
-    el.innerHTML = html
+    el.innerHTML = '<div style="max-height:250px;overflow-y:auto"><table><thead><tr><th>Nama</th><th>Detail</th></tr></thead><tbody>' +
+      unpaid.slice(0, 50).map(s => `<tr><td>${s.nama}</td><td>${s.kelas || '-'}</td></tr>`).join('') +
+      (unpaid.length > 50 ? `<tr><td colspan="2">...dan ${unpaid.length - 50} lainnya</td></tr>` : '') +
+      '</tbody></table></div>'
   } catch (e) {
     el.innerHTML = `<div class="empty-state">Gagal memuat: ${e.message}</div>`
   }
@@ -685,13 +618,17 @@ async function loadSiswa() {
   const search = $('siswaSearch').value
   const lembaga = $('siswaLembaga').value
   const kelas = $('siswaKelas').value
-  let url = `/siswa?${lembaga ? `lembaga=${lembaga}&` : ''}${search ? `search=${encodeURIComponent(search)}&` : ''}${kelas ? `kelas=${encodeURIComponent(kelas)}` : ''}`
-  try {
-    const data = await api(url)
-    renderSiswa(data)
-  } catch (e) {
-    toast(e.message, 'error')
+  let results = []
+  const lembagas = lembaga ? [lembaga] : LEMBAGA_LIST
+  for (const l of lembagas) {
+    let url = `/siswa?lembaga=${l}${search ? `&search=${encodeURIComponent(search)}` : ''}`
+    if (kelas && l !== 'PAUD') url += `&kelas=${encodeURIComponent(kelas)}`
+    try {
+      const data = await api(url)
+      results = results.concat(data)
+    } catch (e) {}
   }
+  renderSiswa(results)
 }
 
 function renderSiswa(data) {
@@ -704,29 +641,30 @@ function renderSiswa(data) {
     <tr>
       <td>${i + 1}</td>
       <td><strong>${s.nama}</strong></td>
-      <td><span class="badge ${s.lembaga === 'MIS' ? 'badge-success' : 'badge-warning'}">${s.lembaga}</span></td>
-      <td>${s.kelas}</td>
-      <td>Rp ${(s.tarifInfaq || 0).toLocaleString('id-ID')}</td>
+      <td>${badgeLembaga(s.lembaga)}</td>
+      <td>${s.kelas || '-'}</td>
+      <td>Rp ${(s.nominalInfaq || 0).toLocaleString('id-ID')}</td>
       <td>
-        <button class="btn btn-sm btn-outline" onclick="editSiswa(${s.id})">✏️</button>
-        <button class="btn btn-sm btn-danger" onclick="hapusSiswa(${s.id}, '${s.nama.replace(/'/g, "\\'")}')">🗑️</button>
+        <button class="btn btn-sm btn-outline" onclick="editSiswa(${s.id}, '${s.lembaga}')">✏️</button>
+        <button class="btn btn-sm btn-danger" onclick="hapusSiswa(${s.id}, '${s.lembaga}', '${s.nama.replace(/'/g, "\\'")}')">🗑️</button>
       </td>
     </tr>
   `).join('')
 }
 
 async function loadKelasOptions() {
-  try {
-    const mis = await api('/siswa?lembaga=MIS')
-    const mts = await api('/siswa?lembaga=MTs')
-    const kelas = new Set()
-    ;[...mis, ...mts].forEach((s) => kelas.add(s.kelas))
-    const sel = $('siswaKelas')
-    sel.innerHTML = '<option value="">Semua Kelas</option>'
-    ;[...kelas].sort().forEach((k) => {
-      sel.innerHTML += `<option value="${k}">${k}</option>`
-    })
-  } catch (e) {}
+  const sel = $('siswaKelas')
+  sel.innerHTML = '<option value="">Semua Kelas</option>'
+  for (const l of ['MIS', 'MTs']) {
+    try {
+      const data = await api(`/siswa?lembaga=${l}`)
+      data.forEach(s => {
+        if (s.kelas && ![...sel.options].some(o => o.value === s.kelas)) {
+          sel.innerHTML += `<option value="${s.kelas}">${s.kelas}</option>`
+        }
+      })
+    } catch (e) {}
+  }
 }
 
 function showTambahSiswa() {
@@ -736,21 +674,20 @@ function showTambahSiswa() {
       <label>Nama Lengkap</label>
       <input type="text" id="fSiswaNama" placeholder="Nama siswa">
     </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Lembaga</label>
-        <select id="fSiswaLembaga">
-          <option value="MIS">MIS</option>
-          <option value="MTs">MTs</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Kelas</label>
-        <select id="fSiswaKelas"></select>
-      </div>
+    <div class="form-group">
+      <label>Lembaga</label>
+      <select id="fSiswaLembaga" onchange="toggleKelasField()">
+        <option value="MIS">MIS</option>
+        <option value="MTs">MTs</option>
+        <option value="PAUD">PAUD</option>
+      </select>
+    </div>
+    <div id="fSiswaKelasGroup" class="form-group">
+      <label>Kelas</label>
+      <select id="fSiswaKelas"></select>
     </div>
     <div class="form-group">
-      <label>Tarif Infaq/SPP (Rp)</label>
+      <label>Nominal Infaq/SPP (Rp)</label>
       <input type="number" id="fSiswaTarif" placeholder="0">
     </div>
     <div class="modal-actions">
@@ -758,40 +695,44 @@ function showTambahSiswa() {
       <button class="btn btn-primary" onclick="simpanSiswa()">Simpan</button>
     </div>
   `)
+  toggleKelasField()
+}
+
+function toggleKelasField() {
+  const l = $('fSiswaLembaga').value
+  const group = $('fSiswaKelasGroup')
   const sel = $('fSiswaKelas')
-  const lembaga = $('fSiswaLembaga').value
-  const kelasList = lembaga === 'MIS'
-    ? ['Kelas I', 'Kelas II', 'Kelas III', 'Kelas IV', 'Kelas V', 'Kelas VI']
-    : ['Kelas VII', 'Kelas VIII', 'Kelas IX']
-  kelasList.forEach((k) => { sel.innerHTML += `<option value="${k}">${k}</option>` })
-  $('fSiswaLembaga').onchange = () => {
-    const l = $('fSiswaLembaga').value
-    const k = l === 'MIS'
+  if (l === 'PAUD') {
+    group.classList.add('hidden')
+  } else {
+    group.classList.remove('hidden')
+    const kelasList = l === 'MIS'
       ? ['Kelas I', 'Kelas II', 'Kelas III', 'Kelas IV', 'Kelas V', 'Kelas VI']
       : ['Kelas VII', 'Kelas VIII', 'Kelas IX']
-    $('fSiswaKelas').innerHTML = k.map((x) => `<option value="${x}">${x}</option>`).join('')
+    sel.innerHTML = kelasList.map(k => `<option value="${k}">${k}</option>`).join('')
   }
 }
 
 async function simpanSiswa() {
+  const lembaga = $('fSiswaLembaga').value
   const body = {
     nama: $('fSiswaNama').value.trim(),
-    lembaga: $('fSiswaLembaga').value,
-    kelas: $('fSiswaKelas').value,
-    tarifInfaq: parseInt($('fSiswaTarif').value) || 0,
+    lembaga,
+    kelas: lembaga === 'PAUD' ? '' : $('fSiswaKelas').value,
+    nominalInfaq: parseInt($('fSiswaTarif').value) || 0,
   }
   if (!body.nama) { toast('Nama harus diisi', 'error'); return }
   try {
-    await api('/siswa', { method: 'POST', body: JSON.stringify(body) })
+    await api(`/siswa?lembaga=${lembaga}`, { method: 'POST', body: JSON.stringify(body) })
     closeModal()
     toast('Siswa berhasil ditambahkan')
     loadSiswa()
   } catch (e) { toast(e.message, 'error') }
 }
 
-async function editSiswa(id) {
-  const data = await api(`/siswa?id=${id}`)
-  const s = data[0]
+async function editSiswa(id, lembaga) {
+  const data = await api(`/siswa?lembaga=${lembaga}`)
+  const s = data.find(x => x.id === id)
   if (!s) return
   modal(`
     <h2>Edit Siswa</h2>
@@ -799,55 +740,66 @@ async function editSiswa(id) {
       <label>Nama Lengkap</label>
       <input type="text" id="fSiswaNama" value="${s.nama}">
     </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Lembaga</label>
-        <select id="fSiswaLembaga">
-          <option value="MIS" ${s.lembaga === 'MIS' ? 'selected' : ''}>MIS</option>
-          <option value="MTs" ${s.lembaga === 'MTs' ? 'selected' : ''}>MTs</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Kelas</label>
-        <select id="fSiswaKelas"></select>
-      </div>
+    <div class="form-group">
+      <label>Lembaga</label>
+      <select id="fSiswaLembaga" onchange="toggleKelasFieldEdit('${s.kelas || ''}')">
+        <option value="MIS" ${lembaga === 'MIS' ? 'selected' : ''}>MIS</option>
+        <option value="MTs" ${lembaga === 'MTs' ? 'selected' : ''}>MTs</option>
+        <option value="PAUD" ${lembaga === 'PAUD' ? 'selected' : ''}>PAUD</option>
+      </select>
+    </div>
+    <div id="fSiswaKelasGroup" class="form-group ${lembaga === 'PAUD' ? 'hidden' : ''}">
+      <label>Kelas</label>
+      <select id="fSiswaKelas"></select>
     </div>
     <div class="form-group">
-      <label>Tarif Infaq/SPP (Rp)</label>
-      <input type="number" id="fSiswaTarif" value="${s.tarifInfaq}">
+      <label>Nominal (Rp)</label>
+      <input type="number" id="fSiswaTarif" value="${s.nominalInfaq || 0}">
     </div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal()">Batal</button>
-      <button class="btn btn-primary" onclick="updateSiswa(${id})">Simpan</button>
+      <button class="btn btn-primary" onclick="updateSiswa(${id}, '${lembaga}')">Simpan</button>
     </div>
   `)
-  const sel = $('fSiswaKelas')
-  const kelasList = s.lembaga === 'MIS'
-    ? ['Kelas I', 'Kelas II', 'Kelas III', 'Kelas IV', 'Kelas V', 'Kelas VI']
-    : ['Kelas VII', 'Kelas VIII', 'Kelas IX']
-  kelasList.forEach((k) => { sel.innerHTML += `<option value="${k}" ${k === s.kelas ? 'selected' : ''}>${k}</option>` })
+  toggleKelasFieldEdit(s.kelas || '')
 }
 
-async function updateSiswa(id) {
+function toggleKelasFieldEdit(currentKelas) {
+  const l = $('fSiswaLembaga').value
+  const group = $('fSiswaKelasGroup')
+  const sel = $('fSiswaKelas')
+  if (l === 'PAUD') {
+    group.classList.add('hidden')
+  } else {
+    group.classList.remove('hidden')
+    const kelasList = l === 'MIS'
+      ? ['Kelas I', 'Kelas II', 'Kelas III', 'Kelas IV', 'Kelas V', 'Kelas VI']
+      : ['Kelas VII', 'Kelas VIII', 'Kelas IX']
+    sel.innerHTML = kelasList.map(k => `<option value="${k}" ${k === currentKelas ? 'selected' : ''}>${k}</option>`).join('')
+  }
+}
+
+async function updateSiswa(id, lembaga) {
+  const l = $('fSiswaLembaga').value
   const body = {
     nama: $('fSiswaNama').value.trim(),
-    lembaga: $('fSiswaLembaga').value,
-    kelas: $('fSiswaKelas').value,
-    tarifInfaq: parseInt($('fSiswaTarif').value) || 0,
+    lembaga: l,
+    kelas: l === 'PAUD' ? '' : $('fSiswaKelas').value,
+    nominalInfaq: parseInt($('fSiswaTarif').value) || 0,
   }
   if (!body.nama) { toast('Nama harus diisi', 'error'); return }
   try {
-    await api(`/siswa?id=${id}`, { method: 'PUT', body: JSON.stringify(body) })
+    await api(`/siswa?lembaga=${lembaga}&id=${id}`, { method: 'PUT', body: JSON.stringify(body) })
     closeModal()
     toast('Siswa berhasil diupdate')
     loadSiswa()
   } catch (e) { toast(e.message, 'error') }
 }
 
-async function hapusSiswa(id, nama) {
+async function hapusSiswa(id, lembaga, nama) {
   if (!confirm(`Hapus siswa "${nama}"?`)) return
   try {
-    await api(`/siswa?id=${id}`, { method: 'DELETE' })
+    await api(`/siswa?lembaga=${lembaga}&id=${id}`, { method: 'DELETE' })
     toast('Siswa berhasil dihapus')
     loadSiswa()
   } catch (e) { toast(e.message, 'error') }
@@ -858,17 +810,6 @@ async function initBayarForm() {
   const lembaga = $('payLembaga').value
   try {
     const kat = await api(`/kategori?lembaga=${lembaga}`)
-    const sel = $('payKategori')
-    sel.innerHTML = '<option value="Infaq">Infaq</option>'
-    kat.forEach((k) => {
-      sel.innerHTML += `<option value="${k.nama}" data-jumlah="${k.jumlahDefault}">${k.nama}</option>`
-    })
-    sel.onchange = () => {
-      const opt = sel.options[sel.selectedIndex]
-      if (opt.dataset.jumlah && opt.dataset.jumlah !== '0') {
-        $('payJumlah').value = opt.dataset.jumlah
-      }
-    }
   } catch (e) {}
 }
 
@@ -877,13 +818,11 @@ async function searchSiswaBayar() {
   clearTimeout(paySearchTimeout)
   const q = $('paySearch').value.trim()
   const lembaga = $('payLembaga').value
-
   if (q.length < 2) {
     $('paySearchResults').innerHTML = ''
-    $('payForm').classList.add('hidden')
+    batalPembayaran()
     return
   }
-
   paySearchTimeout = setTimeout(async () => {
     try {
       const data = await api(`/siswa?lembaga=${lembaga}&search=${encodeURIComponent(q)}`)
@@ -891,93 +830,142 @@ async function searchSiswaBayar() {
         $('paySearchResults').innerHTML = '<div class="empty-state">Siswa tidak ditemukan</div>'
         return
       }
-      $('paySearchResults').innerHTML = data.slice(0, 10).map((s) => `
+      $('paySearchResults').innerHTML = data.slice(0, 10).map(s => `
         <div style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center"
              onmouseover="this.style.background='#f0f4ff'" onmouseout="this.style.background=''"
-             onclick="pilihSiswaBayar(${s.id}, '${s.nama.replace(/'/g, "\\'")}', '${s.lembaga}', ${s.tarifInfaq})">
-          <span><strong>${s.nama}</strong> — ${s.kelas}</span>
-          <span class="badge ${s.lembaga === 'MIS' ? 'badge-success' : 'badge-warning'}">${s.lembaga}</span>
+             onclick="pilihSiswaBayar(${s.id}, '${s.lembaga}', '${s.nama.replace(/'/g, "\\'")}', '${s.kelas || ''}')">
+          <span><strong>${s.nama}</strong> ${s.kelas ? '— ' + s.kelas : ''}</span>
+          <span>${badgeLembaga(s.lembaga)}</span>
         </div>
       `).join('')
     } catch (e) {}
   }, 300)
 }
 
-function pilihSiswaBayar(id, nama, lembaga, tarif) {
-  selectedSiswaId = id
+async function pilihSiswaBayar(id, lembaga, nama, kelas) {
+  selectedSiswa = { id, lembaga, nama, kelas }
   $('payNama').value = nama
   $('payLembagaDisplay').value = lembaga
-  $('payJumlah').value = tarif || ''
   $('paySearchResults').innerHTML = ''
   $('paySearch').value = nama
   $('payForm').classList.remove('hidden')
+
+  const kelasRow = $('payKelasRow')
+  if (lembaga === 'PAUD') {
+    kelasRow.classList.add('hidden')
+  } else {
+    kelasRow.classList.remove('hidden')
+    $('payKelas').value = kelas || ''
+  }
+
+  // Load payment status
+  try {
+    const siswa = await api(`/siswa?lembaga=${lembaga}`)
+    const s = siswa.find(x => x.id === id)
+    if (s) {
+      selectedPayments = s.payments || {}
+      renderMonthGrid(lembaga)
+    }
+  } catch (e) {}
+}
+
+function renderMonthGrid(lembaga) {
+  const el = $('payMonthGrid')
+  el.innerHTML = MONTH_HEADERS.map(m => {
+    const paid = selectedPayments[m]
+    const [monthName, year] = m.split(' ')
+    const shortName = monthName.substring(0, 3) + ' ' + year
+    return `<div onclick="togglePayment('${m}')" style="padding:6px 10px;border-radius:6px;border:1px solid var(--border);font-size:12px;cursor:pointer;${paid ? 'background:var(--success);color:white;border-color:var(--success)' : 'background:#fafafa'}" title="${m}">
+      ${shortName} ${paid ? '✅' : '⬜'}
+    </div>`
+  }).join('')
+}
+
+async function togglePayment(monthHeader) {
+  if (!selectedSiswa) return
+  const [monthName, yearStr] = monthHeader.split(' ')
+  const monthMap = { 'Jul':7,'Aug':8,'Sep':9,'Oct':10,'Nov':11,'Dec':12,'Jan':1,'Feb':2,'Mar':3,'Apr':4,'May':5,'Jun':6 }
+  const bulan = monthMap[monthName.substring(0, 3)]
+  const tahun = parseInt(yearStr)
+
+  if (selectedPayments[monthHeader]) {
+    // Batalkan
+    if (!confirm(`Batalkan pembayaran ${monthHeader} untuk ${selectedSiswa.nama}?`)) return
+    try {
+      await api(`/pembayaran?lembaga=${selectedSiswa.lembaga}&siswaId=${selectedSiswa.id}&bulan=${bulan}&tahun=${tahun}`, { method: 'DELETE' })
+      selectedPayments[monthHeader] = ''
+      toast(`Pembayaran ${monthHeader} dibatalkan`)
+    } catch (e) { toast(e.message, 'error') }
+  } else {
+    // Catat lunas
+    try {
+      await api('/pembayaran', {
+        method: 'POST',
+        body: JSON.stringify({
+          siswaId: selectedSiswa.id,
+          lembaga: selectedSiswa.lembaga,
+          bulan, tahun, jumlah: 0, kategori: 'Infaq',
+        }),
+      })
+      selectedPayments[monthHeader] = 'Lunas'
+      toast(`${selectedSiswa.nama} — ${monthHeader} ✅ Lunas`)
+    } catch (e) { toast(e.message, 'error') }
+  }
+  renderMonthGrid(selectedSiswa.lembaga)
 }
 
 function batalPembayaran() {
-  selectedSiswaId = null
+  selectedSiswa = null
+  selectedPayments = {}
   $('payForm').classList.add('hidden')
   $('paySearch').value = ''
   $('paySearchResults').innerHTML = ''
 }
 
 async function simpanPembayaran() {
-  if (!selectedSiswaId) { toast('Pilih siswa terlebih dahulu', 'error'); return }
-  const body = {
-    siswaId: selectedSiswaId,
-    bulan: parseInt($('payBulan').value),
-    tahun: parseInt($('payTahun').value),
-    jumlah: parseInt($('payJumlah').value) || 0,
-    kategori: $('payKategori').value,
-    lembaga: $('payLembaga').value,
-    keterangan: $('payKeterangan').value.trim(),
-  }
-  if (body.jumlah <= 0) { toast('Jumlah harus diisi', 'error'); return }
-  try {
-    await api('/pembayaran', { method: 'POST', body: JSON.stringify(body) })
-    toast(`Pembayaran ${body.kategori} untuk ${$('payNama').value} berhasil dicatat`)
-    batalPembayaran()
-    loadRiwayat()
-  } catch (e) { toast(e.message, 'error') }
+  if (!selectedSiswa) { toast('Pilih siswa terlebih dahulu', 'error'); return }
+  const bulan = parseInt($('payBulan').value)
+  const tahun = parseInt($('payTahun').value)
+  const mi = (tahun - 2026) * 12 + (bulan - 7)
+  if (mi < 0 || mi >= MONTH_HEADERS.length) { toast('Bulan/tahun tidak tersedia', 'error'); return }
+  const header = MONTH_HEADERS[mi]
+  togglePayment(header)
 }
 
 async function loadRiwayat() {
   const lembaga = $('riwayatLembaga').value
-  let url = '/pembayaran'
-  if (lembaga) url += `?lembaga=${lembaga}`
-  try {
-    const data = await api(url)
-    const tbody = $('riwayatTable')
-    if (data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Belum ada pembayaran</td></tr>'
-      return
-    }
-
-    const siswaMap = {}
+  const lembagas = lembaga ? [lembaga] : LEMBAGA_LIST
+  let allPayments = []
+  for (const l of lembagas) {
     try {
-      const all = await api('/siswa')
-      all.forEach((s) => { siswaMap[s.id] = s })
+      const data = await api(`/pembayaran?lembaga=${l}`)
+      allPayments = allPayments.concat(data)
     } catch (e) {}
-
-    tbody.innerHTML = data.slice(0, 100).map((p) => {
-      const s = siswaMap[p.siswaId] || {}
-      return `<tr>
-        <td>${p.tanggal}</td>
-        <td><strong>${s.nama || 'ID: ' + p.siswaId}</strong></td>
-        <td><span class="badge ${p.lembaga === 'MIS' ? 'badge-success' : 'badge-warning'}">${p.lembaga}</span></td>
-        <td>${BULAN_NAMES[p.bulan - 1] || p.bulan}</td>
-        <td>${p.tahun}</td>
-        <td>${p.kategori}</td>
-        <td><strong>Rp ${(p.jumlah || 0).toLocaleString('id-ID')}</strong></td>
-        <td><button class="btn btn-sm btn-danger" onclick="hapusPembayaran(${p.id})">🗑️</button></td>
-      </tr>`
-    }).join('')
-  } catch (e) { toast(e.message, 'error') }
+  }
+  allPayments.sort((a, b) => b.tanggal.localeCompare(a.tanggal))
+  const tbody = $('riwayatTable')
+  if (allPayments.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Belum ada pembayaran</td></tr>'
+    return
+  }
+  tbody.innerHTML = allPayments.slice(0, 100).map(p => {
+    const [m, y] = p.tanggal.split(' ')
+    return `<tr>
+      <td>${p.tanggal}</td>
+      <td><strong>${p.nama}</strong></td>
+      <td>${badgeLembaga(p.lembaga)}</td>
+      <td>${m || ''}</td>
+      <td>${y || ''}</td>
+      <td><strong>Rp ${(p.jumlah || 0).toLocaleString('id-ID')}</strong></td>
+      <td><button class="btn btn-sm btn-danger" onclick="hapusPembayaran(${p.siswaId}, '${p.lembaga}', ${p.bulan}, ${p.tahun})">🗑️</button></td>
+    </tr>`
+  }).join('')
 }
 
-async function hapusPembayaran(id) {
+async function hapusPembayaran(siswaId, lembaga, bulan, tahun) {
   if (!confirm('Hapus pembayaran ini?')) return
   try {
-    await api(`/pembayaran?id=${id}`, { method: 'DELETE' })
+    await api(`/pembayaran?lembaga=${lembaga}&siswaId=${siswaId}&bulan=${bulan}&tahun=${tahun}`, { method: 'DELETE' })
     toast('Pembayaran berhasil dihapus')
     loadRiwayat()
   } catch (e) { toast(e.message, 'error') }
@@ -992,10 +980,10 @@ async function loadKategori() {
       tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Belum ada kategori</td></tr>'
       return
     }
-    tbody.innerHTML = data.map((k) => `
+    tbody.innerHTML = data.map(k => `
       <tr>
         <td><strong>${k.nama}</strong></td>
-        <td><span class="badge ${k.lembaga === 'MIS' ? 'badge-success' : 'badge-warning'}">${k.lembaga}</span></td>
+        <td>${badgeLembaga(k.lembaga)}</td>
         <td>Rp ${(k.jumlahDefault || 0).toLocaleString('id-ID')}</td>
         <td><button class="btn btn-sm btn-danger" onclick="hapusKategori(${k.id}, '${k.nama.replace(/'/g, "\\'")}')">🗑️</button></td>
       </tr>
@@ -1015,6 +1003,7 @@ function showTambahKategori() {
       <select id="fKatLembaga">
         <option value="MIS">MIS</option>
         <option value="MTs">MTs</option>
+        <option value="PAUD">PAUD</option>
         <option value="">Semua</option>
       </select>
     </div>
@@ -1050,108 +1039,6 @@ async function hapusKategori(id, nama) {
     await api(`/kategori?id=${id}`, { method: 'DELETE' })
     toast('Kategori berhasil dihapus')
     loadKategori()
-  } catch (e) { toast(e.message, 'error') }
-}
-
-// --- PAUD ---
-async function loadPaud() {
-  const search = $('paudSearch').value
-  let url = '/paud'
-  if (search) url += `?search=${encodeURIComponent(search)}`
-  try {
-    const data = await api(url)
-    const tbody = $('paudTable')
-    if (data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Belum ada data siswa PAUD</td></tr>'
-      return
-    }
-    tbody.innerHTML = data.map((s, i) => `
-      <tr>
-        <td>${i + 1}</td>
-        <td><strong>${s.nama}</strong></td>
-        <td>Rp ${(s.tarif || 0).toLocaleString('id-ID')}</td>
-        <td>
-          <button class="btn btn-sm btn-outline" onclick="editPaud(${s.id})">✏️</button>
-          <button class="btn btn-sm btn-danger" onclick="hapusPaud(${s.id}, '${s.nama.replace(/'/g, "\\'")}')">🗑️</button>
-        </td>
-      </tr>
-    `).join('')
-  } catch (e) { toast(e.message, 'error') }
-}
-
-function showTambahPaud() {
-  modal(`
-    <h2>Tambah Siswa PAUD</h2>
-    <div class="form-group">
-      <label>Nama Lengkap</label>
-      <input type="text" id="fPaudNama" placeholder="Nama siswa PAUD">
-    </div>
-    <div class="form-group">
-      <label>Tarif (Rp)</label>
-      <input type="number" id="fPaudTarif" placeholder="0">
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal()">Batal</button>
-      <button class="btn btn-primary" onclick="simpanPaud()">Simpan</button>
-    </div>
-  `)
-}
-
-async function simpanPaud() {
-  const body = {
-    nama: $('fPaudNama').value.trim(),
-    tarif: parseInt($('fPaudTarif').value) || 0,
-  }
-  if (!body.nama) { toast('Nama harus diisi', 'error'); return }
-  try {
-    await api('/paud', { method: 'POST', body: JSON.stringify(body) })
-    closeModal()
-    toast('Siswa PAUD berhasil ditambahkan')
-    loadPaud()
-  } catch (e) { toast(e.message, 'error') }
-}
-
-async function editPaud(id) {
-  const data = await api(`/paud?id=${id}`)
-  const s = data[0]
-  if (!s) return
-  modal(`
-    <h2>Edit Siswa PAUD</h2>
-    <div class="form-group">
-      <label>Nama Lengkap</label>
-      <input type="text" id="fPaudNama" value="${s.nama}">
-    </div>
-    <div class="form-group">
-      <label>Tarif (Rp)</label>
-      <input type="number" id="fPaudTarif" value="${s.tarif || 0}">
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal()">Batal</button>
-      <button class="btn btn-primary" onclick="updatePaud(${id})">Simpan</button>
-    </div>
-  `)
-}
-
-async function updatePaud(id) {
-  const body = {
-    nama: $('fPaudNama').value.trim(),
-    tarif: parseInt($('fPaudTarif').value) || 0,
-  }
-  if (!body.nama) { toast('Nama harus diisi', 'error'); return }
-  try {
-    await api(`/paud?id=${id}`, { method: 'PUT', body: JSON.stringify(body) })
-    closeModal()
-    toast('Siswa PAUD berhasil diupdate')
-    loadPaud()
-  } catch (e) { toast(e.message, 'error') }
-}
-
-async function hapusPaud(id, nama) {
-  if (!confirm(`Hapus siswa PAUD "${nama}"?`)) return
-  try {
-    await api(`/paud?id=${id}`, { method: 'DELETE' })
-    toast('Siswa PAUD berhasil dihapus')
-    loadPaud()
   } catch (e) { toast(e.message, 'error') }
 }
 </script>
