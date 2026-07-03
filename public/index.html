@@ -165,6 +165,12 @@ tr:hover { background: #f8faff; }
 .badge-danger { background: #fce8e6; color: var(--danger); }
 .badge-warning { background: #fef7e0; color: var(--warning); }
 .badge-paud { background: #e8f0fe; color: var(--primary); }
+.cls-Kelas-I { background: #e8f5e9; } .cls-Kelas-II { background: #e3f2fd; } .cls-Kelas-III { background: #fff3e0; }
+.cls-Kelas-IV { background: #fce4ec; } .cls-Kelas-V { background: #f3e5f5; } .cls-Kelas-VI { background: #e0f7fa; }
+.cls-Kelas-VII { background: #f1f8e9; } .cls-Kelas-VIII { background: #fbe9e7; } .cls-Kelas-IX { background: #ede7f6; }
+.cls-PAUD { background: #e8f0fe; }
+.separator-row td { height: 16px; border: none; background: transparent; pointer-events: none; }
+.separator-row + tr td { border-top: 2px dashed #ccc; }
 .mt-2 { margin-top: 16px; }
 .mb-2 { margin-bottom: 16px; }
 .text-right { text-align: right; }
@@ -316,7 +322,14 @@ tr:hover { background: #f8faff; }
         <input type="text" id="payKelas" readonly>
       </div>
       <div class="form-group">
-        <label>Status</label>
+        <label>Tipe Pembayaran</label>
+        <select id="payMetode">
+          <option value="Cash">Cash</option>
+          <option value="QRIS">QRIS</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Status Bulanan</label>
         <div id="payMonthGrid" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px"></div>
       </div>
       <div style="margin-top:12px">
@@ -348,6 +361,7 @@ tr:hover { background: #f8faff; }
             <th>Bulan</th>
             <th>Tahun</th>
             <th>Jumlah</th>
+            <th>Tipe</th>
             <th>Aksi</th>
           </tr>
         </thead>
@@ -436,6 +450,10 @@ const MONTH_HEADERS = [
 
 const LEMBAGA_LIST = ['MIS', 'MTs', 'PAUD']
 
+const KELAS_ORDER = ['Kelas I','Kelas II','Kelas III','Kelas IV','Kelas V','Kelas VI','Kelas VII','Kelas VIII','Kelas IX']
+
+const MONTH_MAP = { Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12,Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6 }
+
 let paymentChart = null
 let incomeChart = null
 let selectedSiswa = null
@@ -478,10 +496,9 @@ document.querySelectorAll('.tab-nav button').forEach((btn) => {
 })
 
 function init() {
-  const year = new Date().getFullYear()
   const ySel = $('dashTahun')
   for (let y = 2026; y <= 2027; y++) {
-    ySel.innerHTML += `<option value="${y}" ${y === year || y === 2026 ? 'selected' : ''}>${y}</option>`
+    ySel.innerHTML += `<option value="${y}">${y}</option>`
   }
   const bulanSel = $('payBulan')
   BULAN_NAMES.forEach((n, i) => {
@@ -489,7 +506,7 @@ function init() {
   })
   const tahunSel = $('payTahun')
   for (let y = 2026; y <= 2027; y++) {
-    tahunSel.innerHTML += `<option value="${y}" ${y === year || y === 2026 ? 'selected' : ''}>${y}</option>`
+    tahunSel.innerHTML += `<option value="${y}">${y}</option>`
   }
   loadDashboard()
 }
@@ -518,6 +535,12 @@ function badgeLembaga(l) {
   if (l === 'MIS') return '<span class="badge badge-success">MIS</span>'
   if (l === 'MTs') return '<span class="badge badge-warning">MTs</span>'
   return '<span class="badge badge-paud">PAUD</span>'
+}
+
+function klasKelas(k) {
+  if (!k) return 'cls-PAUD'
+  const n = k.replace(/\s+/g, '-')
+  return `cls-${n}`
 }
 
 // --- DASHBOARD ---
@@ -605,7 +628,7 @@ async function loadUnpaidList(lembaga) {
       return
     }
     el.innerHTML = '<div style="max-height:250px;overflow-y:auto"><table><thead><tr><th>Nama</th><th>Detail</th></tr></thead><tbody>' +
-      unpaid.slice(0, 50).map(s => `<tr><td>${s.nama}</td><td>${s.kelas || '-'}</td></tr>`).join('') +
+      unpaid.slice(0, 50).map(s => `<tr class="${klasKelas(s.kelas)}"><td>${s.nama}</td><td>${s.kelas || '-'}</td></tr>`).join('') +
       (unpaid.length > 50 ? `<tr><td colspan="2">...dan ${unpaid.length - 50} lainnya</td></tr>` : '') +
       '</tbody></table></div>'
   } catch (e) {
@@ -637,19 +660,29 @@ function renderSiswa(data) {
     tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Tidak ada siswa</td></tr>'
     return
   }
-  tbody.innerHTML = data.map((s, i) => `
-    <tr>
-      <td>${i + 1}</td>
+  let html = ''
+  let prevKelas = null
+  let no = 0
+  for (const s of data) {
+    if (prevKelas && s.kelas !== prevKelas) {
+      html += '<tr class="separator-row"><td colspan="6"></td></tr>'
+    }
+    prevKelas = s.kelas
+    no++
+    const cls = klasKelas(s.kelas)
+    html += `<tr class="${cls}">
+      <td>${no}</td>
       <td><strong>${s.nama}</strong></td>
       <td>${badgeLembaga(s.lembaga)}</td>
       <td>${s.kelas || '-'}</td>
       <td>Rp ${(s.nominalInfaq || 0).toLocaleString('id-ID')}</td>
       <td>
         <button class="btn btn-sm btn-outline" onclick="editSiswa(${s.id}, '${s.lembaga}')">✏️</button>
-        <button class="btn btn-sm btn-danger" onclick="hapusSiswa(${s.id}, '${s.lembaga}', '${s.nama.replace(/'/g, "\\'")}')">🗑️</button>
+        <button class="btn btn-sm btn-danger" onclick="hapusSiswa(${s.id}, '${s.lembaga}', '${s.nama.replace(/'/g, "\\'")}', event)">🗑️</button>
       </td>
-    </tr>
-  `).join('')
+    </tr>`
+  }
+  tbody.innerHTML = html
 }
 
 async function loadKelasOptions() {
@@ -796,7 +829,8 @@ async function updateSiswa(id, lembaga) {
   } catch (e) { toast(e.message, 'error') }
 }
 
-async function hapusSiswa(id, lembaga, nama) {
+async function hapusSiswa(id, lembaga, nama, event) {
+  if (event) event.stopPropagation()
   if (!confirm(`Hapus siswa "${nama}"?`)) return
   try {
     await api(`/siswa?lembaga=${lembaga}&id=${id}`, { method: 'DELETE' })
@@ -807,10 +841,7 @@ async function hapusSiswa(id, lembaga, nama) {
 
 // --- PEMBAYARAN ---
 async function initBayarForm() {
-  const lembaga = $('payLembaga').value
-  try {
-    const kat = await api(`/kategori?lembaga=${lembaga}`)
-  } catch (e) {}
+  try { await api(`/kategori?lembaga=${$('payLembaga').value}`) } catch (e) {}
 }
 
 let paySearchTimeout = null
@@ -858,38 +889,35 @@ async function pilihSiswaBayar(id, lembaga, nama, kelas) {
     $('payKelas').value = kelas || ''
   }
 
-  // Load payment status
   try {
     const siswa = await api(`/siswa?lembaga=${lembaga}`)
     const s = siswa.find(x => x.id === id)
     if (s) {
       selectedPayments = s.payments || {}
-      renderMonthGrid(lembaga)
+      renderMonthGrid()
     }
   } catch (e) {}
 }
 
-function renderMonthGrid(lembaga) {
+function renderMonthGrid() {
   const el = $('payMonthGrid')
   el.innerHTML = MONTH_HEADERS.map(m => {
     const paid = selectedPayments[m]
     const [monthName, year] = m.split(' ')
     const shortName = monthName.substring(0, 3) + ' ' + year
-    return `<div onclick="togglePayment('${m}')" style="padding:6px 10px;border-radius:6px;border:1px solid var(--border);font-size:12px;cursor:pointer;${paid ? 'background:var(--success);color:white;border-color:var(--success)' : 'background:#fafafa'}" title="${m}">
-      ${shortName} ${paid ? '✅' : '⬜'}
+    const tip = paid ? paid : 'Kosong'
+    return `<div onclick="togglePayment('${m}')" style="padding:6px 10px;border-radius:6px;border:1px solid var(--border);font-size:12px;cursor:pointer;${paid ? 'background:var(--success);color:white;border-color:var(--success)' : 'background:#fafafa'}" title="${tip}">
+      ${shortName}<br><small>${paid ? paid.replace(/Lunas\s*Rp\d+\s*/,'') : '⬜'}</small>
     </div>`
   }).join('')
 }
 
 async function togglePayment(monthHeader) {
   if (!selectedSiswa) return
-  const [monthName, yearStr] = monthHeader.split(' ')
-  const monthMap = { 'Jul':7,'Aug':8,'Sep':9,'Oct':10,'Nov':11,'Dec':12,'Jan':1,'Feb':2,'Mar':3,'Apr':4,'May':5,'Jun':6 }
-  const bulan = monthMap[monthName.substring(0, 3)]
-  const tahun = parseInt(yearStr)
+  const bulan = MONTH_MAP[monthHeader.substring(0, 3)]
+  const tahun = parseInt(monthHeader.split(' ')[1])
 
   if (selectedPayments[monthHeader]) {
-    // Batalkan
     if (!confirm(`Batalkan pembayaran ${monthHeader} untuk ${selectedSiswa.nama}?`)) return
     try {
       await api(`/pembayaran?lembaga=${selectedSiswa.lembaga}&siswaId=${selectedSiswa.id}&bulan=${bulan}&tahun=${tahun}`, { method: 'DELETE' })
@@ -897,21 +925,20 @@ async function togglePayment(monthHeader) {
       toast(`Pembayaran ${monthHeader} dibatalkan`)
     } catch (e) { toast(e.message, 'error') }
   } else {
-    // Catat lunas
+    const metode = $('payMetode').value
     try {
       await api('/pembayaran', {
         method: 'POST',
         body: JSON.stringify({
-          siswaId: selectedSiswa.id,
-          lembaga: selectedSiswa.lembaga,
-          bulan, tahun, jumlah: 0, kategori: 'Infaq',
+          siswaId: selectedSiswa.id, lembaga: selectedSiswa.lembaga,
+          bulan, tahun, jumlah: 0, kategori: 'Infaq', metode,
         }),
       })
-      selectedPayments[monthHeader] = 'Lunas'
-      toast(`${selectedSiswa.nama} — ${monthHeader} ✅ Lunas`)
+      selectedPayments[monthHeader] = `Lunas Rp0 ${metode}`
+      toast(`${selectedSiswa.nama} — ${monthHeader} ✅ ${metode}`)
     } catch (e) { toast(e.message, 'error') }
   }
-  renderMonthGrid(selectedSiswa.lembaga)
+  renderMonthGrid()
 }
 
 function batalPembayaran() {
@@ -928,8 +955,7 @@ async function simpanPembayaran() {
   const tahun = parseInt($('payTahun').value)
   const mi = (tahun - 2026) * 12 + (bulan - 7)
   if (mi < 0 || mi >= MONTH_HEADERS.length) { toast('Bulan/tahun tidak tersedia', 'error'); return }
-  const header = MONTH_HEADERS[mi]
-  togglePayment(header)
+  togglePayment(MONTH_HEADERS[mi])
 }
 
 async function loadRiwayat() {
@@ -942,14 +968,18 @@ async function loadRiwayat() {
       allPayments = allPayments.concat(data)
     } catch (e) {}
   }
-  allPayments.sort((a, b) => b.tanggal.localeCompare(a.tanggal))
+  allPayments.sort((a, b) => {
+    const [m1, y1] = a.tanggal.split(' '), [m2, y2] = b.tanggal.split(' ')
+    return (parseInt(y2) - parseInt(y1)) || ((MONTH_MAP[m2] || 0) - (MONTH_MAP[m1] || 0))
+  })
   const tbody = $('riwayatTable')
   if (allPayments.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Belum ada pembayaran</td></tr>'
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Belum ada pembayaran</td></tr>'
     return
   }
   tbody.innerHTML = allPayments.slice(0, 100).map(p => {
     const [m, y] = p.tanggal.split(' ')
+    const metode = p.metode || 'Cash'
     return `<tr>
       <td>${p.tanggal}</td>
       <td><strong>${p.nama}</strong></td>
@@ -957,6 +987,7 @@ async function loadRiwayat() {
       <td>${m || ''}</td>
       <td>${y || ''}</td>
       <td><strong>Rp ${(p.jumlah || 0).toLocaleString('id-ID')}</strong></td>
+      <td><span class="badge ${metode === 'QRIS' ? 'badge-success' : 'badge-warning'}">${metode}</span></td>
       <td><button class="btn btn-sm btn-danger" onclick="hapusPembayaran(${p.siswaId}, '${p.lembaga}', ${p.bulan}, ${p.tahun})">🗑️</button></td>
     </tr>`
   }).join('')

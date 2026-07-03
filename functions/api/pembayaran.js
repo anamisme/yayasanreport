@@ -24,6 +24,7 @@ export async function onRequest(context) {
       const bulan = parseInt(body.bulan)
       const tahun = parseInt(body.tahun)
       const jumlah = parseInt(body.jumlah) || 0
+      const metode = body.metode || 'Cash'
 
       if (!rowId || !bulan || !tahun) {
         return new Response(JSON.stringify({ error: 'siswaId, bulan, tahun diperlukan' }), { status: 400, headers })
@@ -46,12 +47,12 @@ export async function onRequest(context) {
         return new Response(JSON.stringify({ error: 'kolom bulan tidak ditemukan' }), { status: 500, headers })
       }
 
-      const value = `Lunas (Rp ${jumlah.toLocaleString('id-ID')})`
+      const value = `Lunas Rp${jumlah} ${metode}`
       rows[rowId - 1][monthColIdx] = value
       const colLetter = String.fromCharCode(65 + monthColIdx)
       await updateSheet(token, sheetId, `${lembaga}!${colLetter}${rowId}`, [value])
 
-      return new Response(JSON.stringify({ success: true, rowId, bulan, tahun, jumlah }), { status: 201, headers })
+      return new Response(JSON.stringify({ success: true, rowId, bulan, tahun, jumlah, metode }), { status: 201, headers })
     }
 
     if (method === 'DELETE') {
@@ -102,11 +103,16 @@ export async function onRequest(context) {
       if (!row[0]) continue
       monthCols.forEach((ci, mi) => {
         if (ci >= 0 && row[ci]) {
+          const raw = row[ci]
+          // Parse: "Lunas Rp50000 QRIS" or "Lunas Rp0 Cash"
+          const parts = raw.match(/Lunas\s*Rp(\d+)\s*(Cash|QRIS)/i)
+          const jumlah = parts ? parseInt(parts[1]) : (parseInt(raw.replace(/\D/g, '')) || 0)
+          const metode = parts ? parts[2] : 'Cash'
           payments.push({
             id: i, siswaId: i + 1, nama: row[0],
             bulan: mi < 6 ? mi + 7 : mi - 5,
             tahun: mi < 6 ? 2026 : 2027,
-            jumlah: parseInt(row[ci].replace(/\D/g, '')) || 0,
+            jumlah, metode,
             lembaga,
             tanggal: MONTH_HEADERS[mi],
             kategori: 'Infaq',
@@ -117,7 +123,12 @@ export async function onRequest(context) {
 
     if (bulanParam) payments = payments.filter(p => p.bulan === parseInt(bulanParam))
     if (tahunParam) payments = payments.filter(p => p.tahun === parseInt(tahunParam))
-    payments.sort((a, b) => b.tanggal.localeCompare(a.tanggal))
+    payments.sort((a, b) => {
+      const [m1, y1] = a.tanggal.split(' ')
+      const [m2, y2] = b.tanggal.split(' ')
+      const months = { Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12,Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6 }
+      return (parseInt(y2) - parseInt(y1)) || (months[m2] - months[m1])
+    })
 
     return new Response(JSON.stringify(payments), { headers })
   } catch (err) {
