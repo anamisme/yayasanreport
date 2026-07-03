@@ -79,13 +79,14 @@ export async function appendSheet(token, sheetId, range, values) {
 
 export async function updateSheet(token, sheetId, range, values) {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`
+  const rows = Array.isArray(values[0]) ? values : [values]
   const resp = await fetch(url, {
     method: 'PUT',
     headers: {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ values: [values] }),
+    body: JSON.stringify({ values: rows }),
   })
   if (!resp.ok) throw new Error(`Failed to update sheet: ${await resp.text()}`)
   return resp.json()
