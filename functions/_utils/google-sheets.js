@@ -108,6 +108,19 @@ export async function getSheetId(token, sheetId, sheetName) {
   return s ? s.properties.sheetId : null
 }
 
+export async function createSheet(token, sheetId, title) {
+  const info = await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}`)).json()
+  if ((info.sheets || []).some(s => s.properties.title === title)) return { alreadyExists: true }
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}:batchUpdate`
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ requests: [{ addSheet: { properties: { title } } }] }),
+  })
+  if (!resp.ok) throw new Error(`Failed to create sheet: ${await resp.text()}`)
+  return resp.json()
+}
+
 export async function deleteSheetRow(token, sheetId, sheetName, rowIndex) {
   const info = await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}`)).json()
   const s = (info.sheets || []).find(sh => sh.properties.title === sheetName)

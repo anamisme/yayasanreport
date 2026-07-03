@@ -1,4 +1,4 @@
-import { getGoogleAuthToken, getSheet, appendSheet, updateSheet, deleteSheetRow } from '../_utils/google-sheets.js'
+import { getGoogleAuthToken, getSheet, appendSheet, updateSheet, deleteSheetRow, createSheet, MONTH_HEADERS } from '../_utils/google-sheets.js'
 
 const SHEET_NAME = 'Kategori'
 const HEADERS = ['ID', 'Nama', 'Lembaga', 'JumlahDefault', 'CreatedAt']
@@ -14,6 +14,11 @@ function parseRows(rows) {
   })).filter((k) => k.nama)
 }
 
+function sheetTitle(nama, lembaga) {
+  const l = lembaga || 'Semua'
+  return `${l} - ${nama}`
+}
+
 export async function onRequest(context) {
   const { request, env } = context
   const url = new URL(request.url)
@@ -21,7 +26,7 @@ export async function onRequest(context) {
   const headers = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
   }
 
@@ -37,8 +42,44 @@ export async function onRequest(context) {
       const nextId = (data.values?.length || 1)
       const now = new Date().toISOString().split('T')[0]
       await appendSheet(token, sheetId, `${SHEET_NAME}!A:E`, [
-        nextId, body.nama, body.lembaga, body.jumlahDefault || 0, now,
+        nextId, body.nama, body.lembaga || '', body.jumlahDefault || 0, now,
       ])
+
+      // Create a new sheet tab for this category
+      const title = sheetTitle(body.nama, body.lembaga || '')
+      await createSheet(token, sheetId, title)
+
+      // Populate with students from the lembaga
+      const l = body.lembaga || 'MIS'
+      if (l) {
+        try {
+          const siswaData = await getSheet(token, sheetId, `${l}!A:ZZ`)
+          const vals = siswaData.values || []
+          if (vals.length > 0) {
+            const isPaud = l === 'PAUD'
+            const newHeaders = isPaud
+              ? ['Nama', 'Nominal Infaq', ...MONTH_HEADERS]
+              : ['Nama', 'Kelas', 'Nominal Infaq', ...MONTH_HEADERS]
+
+            // Build rows: headers + all students (empty payment columns)
+            const emptyMonths = MONTH_HEADERS.map(() => '')
+            const rows = [newHeaders]
+            for (let i = 1; i < vals.length; i++) {
+              const r = vals[i]
+              if (!r[0]) { rows.push(['', '', ...emptyMonths]); continue }
+              if (isPaud) {
+                rows.push([r[0], r[1] || '0', ...emptyMonths])
+              } else {
+                rows.push([r[0], r[1] || '', r[2] || '0', ...emptyMonths])
+              }
+            }
+            await updateSheet(token, sheetId, `${title}!A:ZZ`, rows)
+          }
+        } catch (e) {
+          // Sheet lembaga might not exist yet, that's OK
+        }
+      }
+
       return new Response(JSON.stringify({ id: nextId, ...body }), {
         status: 201,
         headers,
