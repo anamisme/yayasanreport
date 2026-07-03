@@ -1597,11 +1597,16 @@ async function loadLaporan() {
 }
 
 function downloadLaporanPDF() {
-  const data = window._lapData
-  if (!data || !data.siswa || data.siswa.length === 0) {
-    toast('Tidak ada data untuk di-download', 'error')
-    return
-  }
+  try {
+    if (typeof window.jspdf === 'undefined') {
+      toast('Gagal memuat library PDF. Coba refresh halaman.', 'error')
+      return
+    }
+    const data = window._lapData
+    if (!data || !data.siswa || data.siswa.length === 0) {
+      toast('Tidak ada data untuk di-download', 'error')
+      return
+    }
 
   const months = data.months
   const monthLabels = months.map(m => monthShortDisplay(m))
@@ -1633,9 +1638,10 @@ function downloadLaporanPDF() {
   })
   doc.save(`tunggakan_${data.lembaga}_${data.bulanAwal}-${data.bulanAkhir}_${data.tahun}.pdf`)
   toast('Laporan berhasil di-download')
+  } catch (e) { toast('Gagal generate PDF: ' + e.message, 'error') }
 }
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 </body>
 </html>
