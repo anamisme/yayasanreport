@@ -334,12 +334,18 @@ tr:hover { background: #f8faff; }
         <label>Kelas</label>
         <input type="text" id="payKelas" readonly>
       </div>
-      <div class="form-group">
-        <label>Tipe Pembayaran</label>
-        <select id="payMetode">
-          <option value="Cash">Cash</option>
-          <option value="QRIS">QRIS</option>
-        </select>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tipe Pembayaran</label>
+          <select id="payMetode">
+            <option value="Cash">Cash</option>
+            <option value="QRIS">QRIS</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Jumlah (Rp)</label>
+          <input type="number" id="payJumlah" placeholder="Otomatis">
+        </div>
       </div>
       <div class="form-group">
         <label>Status Bulanan</label>
@@ -925,7 +931,7 @@ async function searchSiswaBayar() {
       $('paySearchResults').innerHTML = data.slice(0, 10).map(s => `
         <div style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center"
              onmouseover="this.style.background='#f0f4ff'" onmouseout="this.style.background=''"
-             onclick="pilihSiswaBayar(${s.id}, '${s.lembaga}', '${s.nama.replace(/'/g, "\\'")}', '${s.kelas || ''}')">
+             onclick="pilihSiswaBayar(${s.id}, '${s.lembaga}', '${s.nama.replace(/'/g, "\\'")}', '${s.kelas || ''}')" data-nominal="${s.nominalInfaq || 0}">
           <span><strong>${s.nama}</strong> ${s.kelas ? '— ' + s.kelas : ''}</span>
           <span>${badgeLembaga(s.lembaga)}</span>
         </div>
@@ -954,7 +960,9 @@ async function pilihSiswaBayar(id, lembaga, nama, kelas) {
     const siswa = await api(`/siswa?lembaga=${lembaga}`)
     const s = siswa.find(x => x.id === id)
     if (s) {
+      selectedSiswa.nominalInfaq = s.nominalInfaq || 0
       selectedPayments = s.payments || {}
+      $('payJumlah').value = s.nominalInfaq || ''
       renderMonthGrid()
     }
   } catch (e) {}
@@ -987,16 +995,17 @@ async function togglePayment(monthHeader) {
     } catch (e) { toast(e.message, 'error') }
   } else {
     const metode = $('payMetode').value
+    const jumlah = parseInt($('payJumlah').value) || selectedSiswa.nominalInfaq || 0
     try {
       await api('/pembayaran', {
         method: 'POST',
         body: JSON.stringify({
           siswaId: selectedSiswa.id, lembaga: selectedSiswa.lembaga,
-          bulan, tahun, jumlah: 0, kategori: 'Infaq', metode,
+          bulan, tahun, jumlah, kategori: 'Infaq', metode,
         }),
       })
-      selectedPayments[monthHeader] = `Lunas Rp0 ${metode}`
-      toast(`${selectedSiswa.nama} — ${monthHeader} ✅ ${metode}`)
+      selectedPayments[monthHeader] = `Lunas Rp${jumlah} ${metode}`
+      toast(`${selectedSiswa.nama} — ${monthHeader} ✅ ${metode} Rp${(jumlah||0).toLocaleString('id-ID')}`)
     } catch (e) { toast(e.message, 'error') }
   }
   renderMonthGrid()
