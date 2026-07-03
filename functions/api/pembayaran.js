@@ -97,10 +97,10 @@ export async function onRequest(context) {
     const bulanParam = url.searchParams.get('bulan')
     const tahunParam = url.searchParams.get('tahun')
 
-    let payments = []
-    for (let i = 1; i < values.length; i++) {
-      const row = values[i]
-      if (!row[0]) continue
+      let payments = []
+      for (let i = 1; i < values.length; i++) {
+        const row = values[i]
+        if (!row[0] || row[0].startsWith('Jumlah ')) continue
       monthCols.forEach((ci, mi) => {
         if (ci >= 0 && row[ci]) {
           const raw = row[ci]

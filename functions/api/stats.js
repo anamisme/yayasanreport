@@ -25,6 +25,9 @@ export async function onRequest(context) {
     const values = data.values || []
     const headersRow = values[0] || []
 
+    // Filter out summary/separator rows (only actual student rows)
+    const studentRows = values.slice(1).filter(r => r[0] && !r[0].startsWith('Jumlah '))
+    const totalSiswa = studentRows.length
     let totalCash = 0, totalQris = 0
     let cashCount = 0, qrisCount = 0
 
@@ -37,11 +40,10 @@ export async function onRequest(context) {
         return { bulan, bulanNama: name, totalSiswa: 0, paidCount: 0, unpaidCount: 0, percentage: 0, totalBayar: 0, cashTotal: 0, qrisTotal: 0, cashCount: 0, qrisCount: 0, aktif: false }
       }
       const colIdx = headersRow.indexOf(MONTH_HEADERS[mi])
-      const totalSiswa = values.length - 1
       let paidCount = 0, totalBayar = 0
       let mCash = 0, mQris = 0, cCash = 0, cQris = 0
-      for (let i = 1; i < values.length; i++) {
-        const val = colIdx >= 0 ? (values[i][colIdx] || '') : ''
+      for (const row of studentRows) {
+        const val = colIdx >= 0 ? (row[colIdx] || '') : ''
         if (val) {
           paidCount++
           const parts = val.match(/Lunas\s*Rp(\d+)\s*(Cash|QRIS)/i)

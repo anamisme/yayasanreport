@@ -12,7 +12,7 @@ function parseValues(rows, lembaga) {
     const payments = {}
     monthCols.forEach((ci, mi) => { payments[MONTH_HEADERS[mi]] = row[ci] || '' })
     return { id: rowNum, nama: row[0] || '', kelas, nominalInfaq: nominal, payments, lembaga }
-  }).filter(s => s.nama)
+  }).filter(s => s.nama && !s.nama.startsWith('Jumlah '))
 }
 
 export async function onRequest(context) {
@@ -36,9 +36,10 @@ export async function onRequest(context) {
     if (method === 'POST') {
       const body = await request.json()
       const isPaud = lembaga === 'PAUD'
+      const total = body.nominalInfaq || 0
       const row = isPaud
-        ? [body.nama, body.nominalInfaq || 0, ...MONTH_HEADERS.map(() => '')]
-        : [body.nama, body.kelas || '', body.nominalInfaq || 0, ...MONTH_HEADERS.map(() => '')]
+        ? [body.nama, total, ...MONTH_HEADERS.map(() => ''), String(total)]
+        : [body.nama, body.kelas || '', total, ...MONTH_HEADERS.map(() => ''), String(total)]
       await appendSheet(token, sheetId, `${lembaga}!A:ZZ`, row)
       return new Response(JSON.stringify({ ...body }), { status: 201, headers })
     }
@@ -52,10 +53,11 @@ export async function onRequest(context) {
       if (id >= rows.length) { return new Response(JSON.stringify({ error: 'siswa tidak ditemukan' }), { status: 404, headers }) }
       const row = rows[id - 1]
       const isPaud = lembaga === 'PAUD'
+      const totalCol = row.length - 1
       if (isPaud) {
-        row[0] = body.nama; row[1] = String(body.nominalInfaq || 0)
+        row[0] = body.nama; row[1] = String(body.nominalInfaq || 0); row[totalCol] = String(body.nominalInfaq || 0)
       } else {
-        row[0] = body.nama; row[1] = body.kelas || ''; row[2] = String(body.nominalInfaq || 0)
+        row[0] = body.nama; row[1] = body.kelas || ''; row[2] = String(body.nominalInfaq || 0); row[totalCol] = String(body.nominalInfaq || 0)
       }
       await updateSheet(token, sheetId, `${lembaga}!A${id}:ZZ${id}`, row)
       return new Response(JSON.stringify({ id, ...body }), { headers })
