@@ -1,5 +1,6 @@
 export async function getGoogleAuthToken(env) {
-  const { privateKey } = JSON.parse(env.GOOGLE_SERVICE_ACCOUNT_KEY || '{}')
+  const parsedKey = JSON.parse(env.GOOGLE_SERVICE_ACCOUNT_KEY || '{}')
+  const privateKey = parsedKey.private_key || parsedKey.privateKey
   if (!privateKey) throw new Error('GOOGLE_SERVICE_ACCOUNT_KEY not configured')
 
   const header = { alg: 'RS256', typ: 'JWT' }
