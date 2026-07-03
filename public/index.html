@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SPP & Infaq - MIS & MTs & PAUD</title>
+<title>Yayasan Baitul Hikmah - Manajemen Pembayaran</title>
+<link rel="icon" type="image/png" href="/logo.png">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -31,7 +32,7 @@ body {
   align-items: flex-start;
   justify-content: space-between;
 }
-.nav-bar .nav-title { font-size: 28px; font-weight: 700; letter-spacing: 0.37px; line-height: 1.2; }
+.nav-bar .nav-title { font-size: 22px; font-weight: 700; letter-spacing: 0.37px; line-height: 1.2; }
 .nav-bar .nav-sub { font-size: 13px; color: #8e8e93; margin-top: 2px; letter-spacing: -0.08px; }
 .nav-btn {
   width: 36px; height: 36px;
@@ -378,8 +379,8 @@ body {
   z-index: 200;
   padding: 20px 0;
 }
-.sidebar-brand { padding: 0 20px 16px; border-bottom: 0.5px solid rgba(60,60,67,0.08); margin-bottom: 8px; }
-.sidebar-brand .title { font-size: 20px; font-weight: 700; letter-spacing: 0.37px; }
+.sidebar-brand { padding: 0 20px 16px; margin-bottom: 8px; }
+.sidebar-brand .title { font-size: 16px; font-weight: 700; letter-spacing: 0.37px; }
 .sidebar-brand .sub { font-size: 12px; color: #8e8e93; margin-top: 2px; }
 .sidebar-nav { flex: 1; display: flex; flex-direction: column; gap: 2px; padding: 0 8px; }
 .sidebar-item {
@@ -455,8 +456,13 @@ body {
 
 <aside class="sidebar">
   <div class="sidebar-brand">
-    <div class="title">SPP & Infaq</div>
-    <div class="sub">MIS / MTs / PAUD</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <img src="/logo.png" alt="" style="width:36px;height:36px;border-radius:8px;flex-shrink:0">
+      <div>
+        <div class="title">Yayasan Baitul Hikmah</div>
+        <div class="sub">Manajemen Pembayaran</div>
+      </div>
+    </div>
   </div>
   <nav class="sidebar-nav">
     <button class="sidebar-item active" data-tab="dashboard">Dashboard</button>
@@ -473,11 +479,14 @@ body {
 <main class="main-area">
 
 <nav class="nav-bar">
-  <div>
-    <div class="nav-title">SPP & Infaq</div>
-    <div class="nav-sub">MIS / MTs / PAUD Baitul Hikmah</div>
-  </div>
-  <button class="nav-btn" onclick="refreshAll()" title="Muat Ulang">⟳</button>
+  <div style="display:flex;align-items:center;gap:10px">
+    <img src="/logo.png" alt="" style="width:36px;height:36px;border-radius:8px;flex-shrink:0">
+      <div>
+        <div class="nav-title">Yayasan Baitul Hikmah</div>
+        <div class="nav-sub">Manajemen Pembayaran</div>
+      </div>
+    </div>
+    <button class="nav-btn" onclick="refreshAll()" title="Muat Ulang">⟳</button>
 </nav>
 
 <div class="ios-container" id="app">
@@ -727,7 +736,7 @@ body {
         </select>
       </div>
       <label style="display:flex;align-items:center;gap:4px;font-size:13px;white-space:nowrap">
-        <input type="checkbox" id="lapUnpaidOnly" checked onchange="loadLaporan()"> Tunggakan
+        <input type="checkbox" id="lapUnpaidOnly" checked onchange="loadLaporan()"> —
       </label>
     </div>
     <div id="lapSummary" class="ios-gray ios-mb2" style="font-size:13px"></div>
