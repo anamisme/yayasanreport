@@ -763,9 +763,6 @@ body {
         <select id="lapTahun" class="ios-select" onchange="loadLaporan()" style="width:auto">
         </select>
       </div>
-      <label style="display:flex;align-items:center;gap:4px;font-size:13px;white-space:nowrap">
-        <input type="checkbox" id="lapUnpaidOnly" checked onchange="loadLaporan()"> —
-      </label>
     </div>
     <div id="lapSummary" class="ios-gray ios-mb2" style="font-size:13px"></div>
     <div class="ios-table-wrap">
@@ -1602,7 +1599,8 @@ async function loadLaporan() {
   const bulanAwal = $('lapBulanAwal').value
   const bulanAkhir = $('lapBulanAkhir').value
   const tahun = $('lapTahun').value
-  const unpaidOnly = $('lapUnpaidOnly').checked
+  const unpaidOnlyElement = $('lapUnpaidOnly')
+  const unpaidOnly = unpaidOnlyElement ? unpaidOnlyElement.checked : true
 
   // Update kelas dropdown
   if (lembaga === 'PAUD') {
