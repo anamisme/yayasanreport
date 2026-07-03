@@ -18,6 +18,41 @@ export async function onRequest(context) {
     const sheetId = env.GOOGLE_SHEET_ID
     const lembaga = (url.searchParams.get('lembaga') || 'MIS')
 
+    if (method === 'PUT') {
+      const rowId = parseInt(url.searchParams.get('siswaId'))
+      const bulan = parseInt(url.searchParams.get('bulan'))
+      const tahun = parseInt(url.searchParams.get('tahun'))
+      if (!rowId || !bulan || !tahun) {
+        return new Response(JSON.stringify({ error: 'siswaId, bulan, tahun diperlukan' }), { status: 400, headers })
+      }
+      const mi = getMonthIdx(bulan, tahun)
+      if (mi < 0 || mi >= MONTH_HEADERS.length) {
+        return new Response(JSON.stringify({ error: 'bulan/tahun tidak valid' }), { status: 400, headers })
+      }
+      const body = await request.json()
+      const jumlah = parseInt(body.jumlah) || 0
+      const metode = body.metode || 'Cash'
+
+      const data = await getSheet(token, sheetId, `${lembaga}!A:ZZ`)
+      const rows = data.values || []
+      if (rowId >= rows.length) {
+        return new Response(JSON.stringify({ error: 'siswa tidak ditemukan' }), { status: 404, headers })
+      }
+      const headersRow = rows[0] || []
+      const monthColIdx = headersRow.indexOf(MONTH_HEADERS[mi])
+      if (monthColIdx < 0) {
+        return new Response(JSON.stringify({ error: 'kolom bulan tidak ditemukan' }), { status: 500, headers })
+      }
+
+      const kategori = body.kategori || 'Infaq'
+      const value = `Lunas Rp${jumlah} ${metode} | ${kategori}`
+      rows[rowId - 1][monthColIdx] = value
+      const colLetter = String.fromCharCode(65 + monthColIdx)
+      await updateSheet(token, sheetId, `${lembaga}!${colLetter}${rowId}`, [value])
+
+      return new Response(JSON.stringify({ success: true, rowId, bulan, tahun, jumlah, metode, kategori }), { headers })
+    }
+
     if (method === 'POST') {
       const body = await request.json()
       const rowId = parseInt(body.siswaId)
@@ -47,12 +82,13 @@ export async function onRequest(context) {
         return new Response(JSON.stringify({ error: 'kolom bulan tidak ditemukan' }), { status: 500, headers })
       }
 
-      const value = `Lunas Rp${jumlah} ${metode}`
+      const kategori = body.kategori || 'Infaq'
+      const value = `Lunas Rp${jumlah} ${metode} | ${kategori}`
       rows[rowId - 1][monthColIdx] = value
       const colLetter = String.fromCharCode(65 + monthColIdx)
       await updateSheet(token, sheetId, `${lembaga}!${colLetter}${rowId}`, [value])
 
-      return new Response(JSON.stringify({ success: true, rowId, bulan, tahun, jumlah, metode }), { status: 201, headers })
+      return new Response(JSON.stringify({ success: true, rowId, bulan, tahun, jumlah, metode, kategori }), { status: 201, headers })
     }
 
     if (method === 'DELETE') {
@@ -105,17 +141,17 @@ export async function onRequest(context) {
         if (ci >= 0 && row[ci]) {
           const raw = row[ci]
           // Parse: "Lunas Rp50000 QRIS" or "Lunas Rp0 Cash"
-          const parts = raw.match(/Lunas\s*Rp(\d+)\s*(Cash|QRIS)/i)
+          const parts = raw.match(/Lunas\s*Rp(\d+)\s*(Cash|QRIS)\s*\|\s*(.+)/i)
           const jumlah = parts ? parseInt(parts[1]) : (parseInt(raw.replace(/\D/g, '')) || 0)
           const metode = parts ? parts[2] : 'Cash'
+          const kategori = parts ? parts[3].trim() : 'Infaq'
           payments.push({
             id: i, siswaId: i + 1, nama: row[0],
             bulan: mi < 6 ? mi + 7 : mi - 5,
             tahun: mi < 6 ? 2026 : 2027,
-            jumlah, metode,
+            jumlah, metode, kategori,
             lembaga,
             tanggal: MONTH_HEADERS[mi],
-            kategori: 'Infaq',
           })
         }
       })

@@ -46,7 +46,7 @@ export async function onRequest(context) {
         const val = colIdx >= 0 ? (row[colIdx] || '') : ''
         if (val) {
           paidCount++
-          const parts = val.match(/Lunas\s*Rp(\d+)\s*(Cash|QRIS)/i)
+          const parts = val.match(/Lunas\s*Rp(\d+)\s*(Cash|QRIS)\s*\|\s*(.+)/i) || val.match(/Lunas\s*Rp(\d+)\s*(Cash|QRIS)/i)
           const num = parts ? parseInt(parts[1]) : (parseInt(val.replace(/\D/g, '')) || 0)
           const metode = parts ? parts[2] : 'Cash'
           totalBayar += num
@@ -64,14 +64,38 @@ export async function onRequest(context) {
       }
     })
 
+    // Per-class breakdown
+    const isPaud = lembaga === 'PAUD'
+    const kelasMap = {}
+    for (const row of studentRows) {
+      const kelas = isPaud ? 'PAUD' : (row[1] || 'Tanpa Kelas')
+      if (!kelasMap[kelas]) kelasMap[kelas] = { kelas, totalSiswa: 0, totalBayar: 0, paidCount: 0 }
+      kelasMap[kelas].totalSiswa++
+      // Sum across all months
+      for (let mi = 0; mi < 12; mi++) {
+        if (mi >= MONTH_HEADERS.length) break
+        const colIdx = headersRow.indexOf(MONTH_HEADERS[mi])
+        if (colIdx < 0) continue
+        const val = row[colIdx] || ''
+        if (val) {
+          const parts = val.match(/Lunas\s*Rp(\d+)/i)
+          const num = parts ? parseInt(parts[1]) : 0
+          kelasMap[kelas].totalBayar += num
+          if (mi === 0) kelasMap[kelas].paidCount++
+        }
+      }
+    }
+    const perKelas = Object.values(kelasMap).sort((a, b) => a.kelas.localeCompare(b.kelas))
+
     const filtered = bulanParam ? monthly.filter(m => m.bulan === parseInt(bulanParam)) : monthly
     const totalPemasukan = monthly.filter(m => m.aktif).reduce((s, m) => s + m.totalBayar, 0)
 
     return new Response(JSON.stringify({
       tahun, lembaga,
-      totalSiswa: Math.max(0, values.length - 1),
+      totalSiswa,
       totalPemasukan, totalCash, totalQris, cashCount, qrisCount,
       monthly: filtered,
+      perKelas,
     }), { headers })
   } catch (err) {
     return new Response(JSON.stringify({ error: err.message }), { status: 500, headers })

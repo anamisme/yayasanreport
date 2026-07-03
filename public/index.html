@@ -6,373 +6,607 @@
 <title>SPP & Infaq - MIS & MTs & PAUD</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
-:root {
-  --primary: #1a73e8;
-  --primary-dark: #1557b0;
-  --success: #0f9d58;
-  --warning: #f4b400;
-  --danger: #ea4335;
-  --bg: #f0f4f8;
-  --card: #ffffff;
-  --text: #333;
-  --text-secondary: #666;
-  --border: #e0e0e0;
-  --radius: 10px;
-  --shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  line-height: 1.6;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro', 'Helvetica Neue', sans-serif;
+  background: #f2f2f7;
+  color: #1c1c1e;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  padding-bottom: 90px;
+  min-height: 100vh;
 }
-.topbar {
-  background: var(--primary);
-  color: white;
-  padding: 12px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+
+/* Nav Bar */
+.nav-bar {
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-.topbar h1 { font-size: 18px; font-weight: 600; }
-.topbar .sub { font-size: 12px; opacity: 0.8; }
-.tab-nav {
+  background: rgba(242,242,247,0.82);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 0.5px solid rgba(60,60,67,0.08);
+  padding: 8px 20px;
   display: flex;
-  background: white;
-  border-bottom: 2px solid var(--border);
-  position: sticky;
-  top: 52px;
-  z-index: 99;
+  align-items: flex-start;
+  justify-content: space-between;
 }
-.tab-nav button {
-  flex: 1;
-  padding: 12px;
+.nav-bar .nav-title { font-size: 28px; font-weight: 700; letter-spacing: 0.37px; line-height: 1.2; }
+.nav-bar .nav-sub { font-size: 13px; color: #8e8e93; margin-top: 2px; letter-spacing: -0.08px; }
+.nav-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
   border: none;
-  background: none;
-  font-size: 14px;
-  font-weight: 500;
+  background: rgba(60,60,67,0.06);
+  color: #007aff;
+  font-size: 17px;
   cursor: pointer;
-  color: var(--text-secondary);
-  transition: all 0.2s;
-  border-bottom: 3px solid transparent;
-}
-.tab-nav button.active {
-  color: var(--primary);
-  border-bottom-color: var(--primary);
-}
-.tab-nav button:hover { background: #f5f5f5; }
-.container { max-width: 1200px; margin: 0 auto; padding: 16px; }
-.card {
-  background: var(--card);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 20px;
-  margin-bottom: 16px;
-}
-.card h2 { font-size: 16px; margin-bottom: 12px; color: var(--text); }
-.card h3 { font-size: 14px; margin-bottom: 8px; color: var(--text-secondary); }
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-.stat-box {
-  text-align: center;
-  padding: 16px;
-  border-radius: var(--radius);
-  background: #f8faff;
-  border: 1px solid var(--border);
-}
-.stat-box .value { font-size: 28px; font-weight: 700; color: var(--primary); }
-.stat-box .label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
-.stat-box.success .value { color: var(--success); }
-.stat-box.warning .value { color: var(--warning); }
-.stat-box.danger .value { color: var(--danger); }
-input, select, button, textarea {
-  font-family: inherit;
-  font-size: 14px;
-}
-input, select {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  outline: none;
-  transition: border 0.2s;
-}
-input:focus, select:focus { border-color: var(--primary); }
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 14px;
-}
-.btn-primary { background: var(--primary); color: white; }
-.btn-primary:hover { background: var(--primary-dark); }
-.btn-success { background: var(--success); color: white; }
-.btn-success:hover { background: #0b8043; }
-.btn-danger { background: var(--danger); color: white; }
-.btn-danger:hover { background: #d33426; }
-.btn-warning { background: var(--warning); color: white; }
-.btn-outline {
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--text);
-}
-.btn-outline:hover { background: #f5f5f5; }
-.btn-sm { padding: 6px 12px; font-size: 12px; }
-.form-group { margin-bottom: 12px; }
-.form-group label {
-  display: block;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  margin-bottom: 4px;
-}
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.search-box {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-.search-box input { flex: 1; }
-.search-box select { width: auto; min-width: 140px; }
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
-th { font-weight: 600; color: var(--text-secondary); background: #fafafa; font-size: 12px; text-transform: uppercase; }
-tr:hover { background: #f8faff; }
-.badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 600;
-}
-.badge-success { background: #e6f4ea; color: var(--success); }
-.badge-danger { background: #fce8e6; color: var(--danger); }
-.badge-warning { background: #fef7e0; color: var(--warning); }
-.badge-paud { background: #e8f0fe; color: var(--primary); }
-.cls-Kelas-I { background: #e8f5e9; } .cls-Kelas-II { background: #e3f2fd; } .cls-Kelas-III { background: #fff3e0; }
-.cls-Kelas-IV { background: #fce4ec; } .cls-Kelas-V { background: #f3e5f5; } .cls-Kelas-VI { background: #e0f7fa; }
-.cls-Kelas-VII { background: #f1f8e9; } .cls-Kelas-VIII { background: #fbe9e7; } .cls-Kelas-IX { background: #ede7f6; }
-.cls-PAUD { background: #e8f0fe; }
-.separator-row td { height: 16px; border: none; background: transparent; pointer-events: none; }
-.separator-row + tr td { border-top: 2px dashed #ccc; }
-.mt-2 { margin-top: 16px; }
-.mb-2 { margin-bottom: 16px; }
-.text-right { text-align: right; }
-.flex { display: flex; }
-.flex-between { display: flex; justify-content: space-between; align-items: center; }
-.gap-2 { gap: 8px; }
-.hidden { display: none !important; }
-.modal {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.4);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  margin-top: 4px;
 }
-.modal-content {
-  background: white;
-  border-radius: var(--radius);
-  padding: 24px;
-  width: 90%;
-  max-width: 500px;
+.nav-btn:active { background: rgba(60,60,67,0.12); transform: scale(0.92); }
+
+/* Container */
+.ios-container { max-width: 1200px; margin: 0 auto; padding: 10px 16px 20px; }
+
+/* Cards */
+.ios-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+  padding: 16px;
+  margin-bottom: 10px;
+}
+.ios-card-title { font-size: 13px; font-weight: 600; color: #8e8e93; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+.ios-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+
+/* Stats Grid */
+.ios-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.metode-charts { display: flex; flex-direction: column; gap: 12px; }
+.ios-stat {
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ios-stat-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.ios-stat-value { font-size: 26px; font-weight: 700; line-height: 1.1; letter-spacing: -0.5px; }
+.ios-stat-label { font-size: 12px; color: #8e8e93; letter-spacing: -0.08px; }
+
+/* Bottom Tab Bar */
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(242,242,247,0.78);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-top: 0.5px solid rgba(60,60,67,0.08);
+  display: flex;
+  padding: 6px 0;
+  padding-bottom: max(6px, env(safe-area-inset-bottom, 6px));
+}
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  padding: 3px 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 0.15s;
+}
+.tab-item svg { width: 24px; height: 24px; display: block; }
+.tab-item span { font-size: 10px; font-weight: 500; letter-spacing: 0.1px; }
+.tab-item.active svg { color: #007aff; }
+.tab-item.active span { color: #007aff; font-weight: 600; }
+.tab-item:not(.active) svg { color: #8e8e93; }
+.tab-item:not(.active) span { color: #8e8e93; }
+
+/* Form Elements */
+.ios-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  border-radius: 10px;
+  background: #e5e5ea;
+  font-size: 16px;
+  font-family: inherit;
+  outline: none;
+  transition: background 0.2s;
+  -webkit-appearance: none;
+  color: #1c1c1e;
+}
+.ios-input::placeholder { color: #8e8e93; }
+.ios-input:focus { background: #d1d1d6; }
+.ios-select {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  background: #e5e5ea;
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  color: #007aff;
+  font-weight: 500;
+  -webkit-appearance: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.ios-select:focus { background: #d1d1d6; }
+.ios-search { display: flex; gap: 8px; margin-bottom: 10px; }
+.ios-search .ios-input { flex: 1; background: #e5e5ea; font-size: 17px; }
+.ios-search .ios-select { width: auto; min-width: 100px; }
+.ios-search-group { display: flex; flex-direction: column; gap: 2px; }
+.ios-search-label { font-size: 11px; color: #8e8e93; font-weight: 500; letter-spacing: 0.3px; text-transform: uppercase; }
+
+/* Buttons */
+.ios-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.ios-btn:active { opacity: 0.6; transform: scale(0.97); }
+.ios-btn-primary { background: #007aff; color: white; }
+.ios-btn-success { background: #34c759; color: white; }
+.ios-btn-danger { background: #ff3b30; color: white; }
+.ios-btn-orange { background: #ff9500; color: white; }
+.ios-btn-ghost { background: transparent; color: #007aff; }
+.ios-btn-sm { padding: 6px 14px; font-size: 13px; border-radius: 8px; }
+.ios-btn-block { width: 100%; }
+
+/* Form Group */
+.ios-fg { margin-bottom: 14px; }
+.ios-fg label { display: block; font-size: 13px; font-weight: 500; color: #8e8e93; margin-bottom: 6px; }
+.ios-fr { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* Badges */
+.ios-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.08px;
+}
+.ios-badge-blue { background: #e8f0fe; color: #007aff; }
+.ios-badge-green { background: #e6f9ed; color: #34c759; }
+.ios-badge-red { background: #fce8e6; color: #ff3b30; }
+.ios-badge-orange { background: #fef3e0; color: #ff9500; }
+.ios-badge-gray { background: #f2f2f7; color: #8e8e93; }
+
+/* Tables */
+.ios-table-wrap { overflow-x: auto; margin: 0 -16px; padding: 0 16px; }
+.ios-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.ios-table th {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: #8e8e93;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 0.5px solid rgba(60,60,67,0.08);
+}
+.ios-table td { padding: 10px 12px; border-bottom: 0.5px solid rgba(60,60,67,0.06); }
+.ios-table tr:last-child td { border-bottom: none; }
+
+/* Lists */
+.ios-list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 0.5px solid rgba(60,60,67,0.06);
+  transition: background 0.15s;
+  cursor: default;
+}
+.ios-list-item:last-child { border-bottom: none; }
+.ios-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  color: white;
+  flex-shrink: 0;
+}
+
+/* Segmented Control */
+.ios-segment {
+  display: inline-flex;
+  background: #e5e5ea;
+  border-radius: 8px;
+  padding: 2px;
+  gap: 2px;
+  margin-bottom: 10px;
+}
+.ios-segment button {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  background: transparent;
+  color: #3a3a3c;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.ios-segment button.active {
+  background: #ffffff;
+  color: #1c1c1e;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Modal */
+.ios-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+.ios-modal {
+  background: #f2f2f7;
+  border-radius: 14px 14px 0 0;
+  padding: 20px;
+  width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-}
-.modal-content h2 { margin-bottom: 16px; }
-.modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
-.empty-state {
-  text-align: center;
-  padding: 40px;
-  color: var(--text-secondary);
-}
-.chart-container { height: 300px; margin-top: 12px; }
-@media (max-width: 768px) {
-  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
-  .form-row { grid-template-columns: 1fr; }
-  .search-box { flex-direction: column; }
-  .search-box select { width: 100%; }
-}
-.toast {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  padding: 12px 20px;
-  border-radius: 8px;
-  color: white;
-  font-weight: 500;
-  z-index: 2000;
   animation: slideUp 0.3s ease;
 }
-.toast-success { background: var(--success); }
-.toast-error { background: var(--danger); }
-@keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+.ios-modal-handle {
+  width: 36px; height: 5px;
+  background: rgba(60,60,67,0.12);
+  border-radius: 3px;
+  margin: 0 auto 14px;
+}
+.ios-modal h2 { font-size: 20px; font-weight: 700; margin-bottom: 16px; }
+.ios-modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+.ios-modal-actions .ios-btn { flex: 1; }
+
+/* Toast */
+.ios-toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 24px;
+  border-radius: 14px;
+  background: rgba(0,0,0,0.78);
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 2000;
+  animation: toastIn 0.3s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  text-align: center;
+  max-width: 80%;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Month Grid */
+.ios-mg { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 4px; }
+.ios-mg .mg-month { text-align: center; padding: 4px; }
+.ios-mg .mg-label { font-size: 11px; color: #3a3a3c; font-weight: 600; margin-bottom: 4px; }
+.ios-mg .mg-status {
+  display: block; width: 100%; padding: 6px 0; border-radius: 8px; font-size: 15px; font-weight: 600;
+  cursor: pointer; border: none; font-family: inherit; text-align: center; transition: all 0.15s;
+  background: #f2f2f7; color: #ff3b30;
+}
+.ios-mg .mg-status.paid { background: #34c759; color: white; }
+
+/* Empty & Separator */
+.ios-empty { text-align: center; padding: 24px 16px; color: #8e8e93; font-size: 15px; }
+.ios-sep { height: 2px; background: transparent; border: none; }
+
+/* Charts */
+.chart-container { height: 240px; margin-top: 4px; position: relative; }
+
+/* Utils */
+.ios-f { display: flex; }
+.ios-fb { display: flex; justify-content: space-between; align-items: center; }
+.ios-g2 { gap: 8px; }
+.ios-g3 { gap: 12px; }
+.ios-mt2 { margin-top: 12px; }
+.ios-mb2 { margin-bottom: 12px; }
+.ios-hidden { display: none !important; }
+.ios-tr { text-align: right; }
+.ios-tc { text-align: center; }
+.ios-green { color: #34c759; }
+.ios-red { color: #ff3b30; }
+.ios-blue { color: #007aff; }
+.ios-gray { color: #8e8e93; }
+.ios-bold { font-weight: 600; }
+
+/* Animations */
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes toastIn { from { transform: translateX(-50%) translateY(10px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+@keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* Sidebar */
+.sidebar {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  width: 240px;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-right: 0.5px solid rgba(60,60,67,0.08);
+  flex-direction: column;
+  z-index: 200;
+  padding: 20px 0;
+}
+.sidebar-brand { padding: 0 20px 16px; border-bottom: 0.5px solid rgba(60,60,67,0.08); margin-bottom: 8px; }
+.sidebar-brand .title { font-size: 20px; font-weight: 700; letter-spacing: 0.37px; }
+.sidebar-brand .sub { font-size: 12px; color: #8e8e93; margin-top: 2px; }
+.sidebar-nav { flex: 1; display: flex; flex-direction: column; gap: 2px; padding: 0 8px; }
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  background: none;
+  font-size: 15px;
+  font-weight: 500;
+  font-family: inherit;
+  color: #3a3a3c;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.sidebar-item:hover { background: rgba(60,60,67,0.04); }
+.sidebar-item.active { background: #e8f0fe; color: #007aff; font-weight: 600; }
+.sidebar-item:active { opacity: 0.7; }
+.sidebar-footer { padding: 8px; margin-top: auto; }
+.sidebar-footer .sidebar-item { font-size: 13px; color: #8e8e93; }
+.sidebar-btn-pay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #007aff;
+  background: rgba(0,122,255,0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  cursor: pointer;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.sidebar-btn-pay:active { background: rgba(0,122,255,0.16); transform: scale(0.97); }
+
+.app-layout { display: flex; min-height: 100vh; }
+.main-area { flex: 1; min-width: 0; }
+
+/* Responsive */
+@media (min-width: 1024px) {
+  body { padding-bottom: 0; }
+  .sidebar { display: flex; }
+  .main-area { margin-left: 240px; }
+  .nav-bar { padding-left: 24px; padding-right: 24px; }
+  .tab-bar { display: none !important; }
+  .ios-stats { grid-template-columns: repeat(4, 1fr); }
+  .ios-container { padding: 20px 24px 32px; }
+  .metode-charts { flex-direction: row; }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .ios-stats { grid-template-columns: repeat(4, 1fr); }
+  .ios-container { padding: 16px 24px 24px; }
+  .metode-charts { flex-direction: row; }
+}
 }
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div>
-    <h1>SPP & Infaq</h1>
-    <div class="sub">MIS / MTs / PAUD Baitul Hikmah</div>
-  </div>
-  <div>
-    <button class="btn btn-outline btn-sm" style="color:white;border-color:rgba(255,255,255,0.3)" onclick="refreshAll()">🔄 Muat Ulang</button>
-  </div>
-</div>
+<div class="app-layout">
 
-<div class="tab-nav" id="tabNav">
-  <button class="active" data-tab="dashboard">📊 Dashboard</button>
-  <button data-tab="bayar">💰 Pembayaran</button>
-  <button data-tab="siswa">👥 Siswa</button>
-  <button data-tab="kategori">🏷️ Kategori</button>
-  <button data-tab="laporan">📋 Laporan</button>
-</div>
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="title">SPP & Infaq</div>
+    <div class="sub">MIS / MTs / PAUD</div>
+  </div>
+  <nav class="sidebar-nav">
+    <button class="sidebar-item active" data-tab="dashboard">Dashboard</button>
+    <button class="sidebar-item" data-tab="bayar">Pembayaran</button>
+    <button class="sidebar-item" data-tab="siswa">Siswa</button>
+    <button class="sidebar-item" data-tab="kategori">Kategori</button>
+    <button class="sidebar-item" data-tab="laporan">Laporan</button>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="sidebar-btn-pay" onclick="switchTab('bayar');$('payForm').classList.remove('ios-hidden');setTimeout(function(){document.getElementById('paySearch').focus()},200)">+ Pembayaran</button>
+  </div>
+</aside>
 
-<div class="container" id="app">
+<main class="main-area">
+
+<nav class="nav-bar">
+  <div>
+    <div class="nav-title">SPP & Infaq</div>
+    <div class="nav-sub">MIS / MTs / PAUD Baitul Hikmah</div>
+  </div>
+  <button class="nav-btn" onclick="refreshAll()" title="Muat Ulang">⟳</button>
+</nav>
+
+<div class="ios-container" id="app">
 
 <div id="tab-dashboard" class="tab-content">
-  <div class="flex-between mb-2">
-    <div>
-      <select id="dashLembaga" onchange="loadDashboard()">
-        <option value="MIS">MIS</option>
-        <option value="MTs">MTs</option>
-        <option value="PAUD">PAUD</option>
-      </select>
-      <select id="dashTahun" onchange="loadDashboard()" style="width:auto;margin-left:8px">
+  <div class="ios-fb ios-mb2">
+    <select id="dashLembaga" class="ios-hidden"><option value="MIS" selected>MIS</option><option value="MTs">MTs</option><option value="PAUD">PAUD</option></select>
+    <div class="ios-segment">
+      <button class="active" onclick="document.getElementById('dashLembaga').value='MIS';loadDashboard();this.parentElement.querySelector('.active').classList.remove('active');this.classList.add('active')">MIS</button>
+      <button onclick="document.getElementById('dashLembaga').value='MTs';loadDashboard();this.parentElement.querySelector('.active').classList.remove('active');this.classList.add('active')">MTs</button>
+      <button onclick="document.getElementById('dashLembaga').value='PAUD';loadDashboard();this.parentElement.querySelector('.active').classList.remove('active');this.classList.add('active')">PAUD</button>
+    </div>
+    <div class="ios-search-group">
+      <span class="ios-search-label">Tahun</span>
+      <select id="dashTahun" onchange="loadDashboard()" class="ios-select" style="width:auto">
       </select>
     </div>
   </div>
-  <div class="grid-4" id="dashStats"></div>
-  <div class="card">
-    <h2>Persentase Pembayaran per Bulan</h2>
+  <div class="ios-stats" id="dashStats"></div>
+  <div class="ios-card">
+    <div class="ios-card-title">Persentase Pembayaran per Bulan</div>
     <div class="chart-container">
       <canvas id="chartPayment"></canvas>
     </div>
   </div>
-  <div class="grid-3">
-    <div class="card">
-      <h2>Total Pemasukan per Bulan</h2>
-      <div class="chart-container">
-        <canvas id="chartIncome"></canvas>
-      </div>
-    </div>
-    <div class="card">
-      <h2>Cash vs QRIS per Bulan</h2>
-      <div class="chart-container">
-        <canvas id="chartMetode"></canvas>
-      </div>
-    </div>
-    <div class="card">
-      <h2>Cash vs QRIS (Total)</h2>
-      <div class="chart-container" style="height:250px">
-        <canvas id="chartMetodePie"></canvas>
-      </div>
-      <div id="metodeStats" style="text-align:center;margin-top:8px;font-size:13px;color:var(--text-secondary)"></div>
+  <div class="ios-card">
+    <div class="ios-card-title">Total Pemasukan per Bulan</div>
+    <div class="chart-container">
+      <canvas id="chartIncome"></canvas>
     </div>
   </div>
-  <div class="card">
-    <h2>Belum Bayar (Bulan Ini)</h2>
+  <div class="ios-card">
+    <div class="ios-card-title">Metode Pembayaran</div>
+    <div class="metode-charts">
+      <div style="flex:1;min-height:200px"><canvas id="chartMetode"></canvas></div>
+      <div style="flex:1;min-height:200px"><canvas id="chartMetodePie"></canvas></div>
+    </div>
+    <div id="metodeStats" class="ios-tc ios-mt2 ios-gray" style="font-size:13px"></div>
+  </div>
+  <div class="ios-card">
+    <div class="ios-card-title">Belum Bayar (Bulan Ini)</div>
     <div id="unpaidList"></div>
   </div>
 </div>
 
-<div id="tab-bayar" class="tab-content hidden">
-  <div class="card">
-    <h2>Catat Pembayaran</h2>
-    <div class="search-box">
-      <input type="text" id="paySearch" placeholder="Cari nama siswa..." oninput="searchSiswaBayar()">
-      <select id="payLembaga" onchange="searchSiswaBayar()">
-        <option value="MIS">MIS</option>
-        <option value="MTs">MTs</option>
-        <option value="PAUD">PAUD</option>
-      </select>
-    </div>
-    <div id="paySearchResults" class="mb-2"></div>
-
-    <div id="payForm" class="hidden">
-      <div class="form-row">
-        <div class="form-group">
-          <label>Nama Siswa</label>
-          <input type="text" id="payNama" readonly>
-        </div>
-        <div class="form-group">
-          <label>Lembaga</label>
-          <input type="text" id="payLembagaDisplay" readonly>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Bulan</label>
-          <select id="payBulan"></select>
-        </div>
-        <div class="form-group">
-          <label>Tahun</label>
-          <select id="payTahun"></select>
-        </div>
-      </div>
-      <div id="payKelasRow" class="form-group hidden">
-        <label>Kelas</label>
-        <input type="text" id="payKelas" readonly>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Tipe Pembayaran</label>
-          <select id="payMetode">
-            <option value="Cash">Cash</option>
-            <option value="QRIS">QRIS</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Jumlah (Rp)</label>
-          <input type="number" id="payJumlah" placeholder="Otomatis">
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Status Bulanan</label>
-        <div id="payMonthGrid" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px"></div>
-      </div>
-      <div style="margin-top:12px">
-        <button class="btn btn-success" onclick="simpanPembayaran()">✅ Tandai Lunas</button>
-        <button class="btn btn-danger" onclick="batalPembayaran()">Batal</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="flex-between">
-      <h2>Riwayat Pembayaran</h2>
-      <div>
-        <select id="riwayatLembaga" onchange="loadRiwayat()">
-          <option value="">Semua</option>
+<div id="tab-bayar" class="tab-content ios-hidden">
+    <div class="ios-card">
+    <div class="ios-card-title">Catat Pembayaran</div>
+    <div class="ios-search">
+      <input type="text" id="paySearch" class="ios-input" placeholder="Cari nama siswa..." oninput="searchSiswaBayar()">
+      <div class="ios-search-group">
+        <span class="ios-search-label">Lembaga</span>
+        <select id="payLembaga" class="ios-select" onchange="searchSiswaBayar();loadPayKategori(this.value)">
           <option value="MIS">MIS</option>
           <option value="MTs">MTs</option>
           <option value="PAUD">PAUD</option>
         </select>
       </div>
     </div>
-    <div style="overflow-x:auto">
-      <table>
+    <div id="paySearchResults" class="ios-mb2"></div>
+
+    <div id="payForm" class="ios-hidden">
+      <div class="ios-fr">
+        <div class="ios-fg">
+          <label>Nama Siswa</label>
+          <input type="text" id="payNama" class="ios-input" readonly>
+        </div>
+        <div class="ios-fg">
+          <label>Lembaga</label>
+          <input type="text" id="payLembagaDisplay" class="ios-input" readonly>
+        </div>
+      </div>
+      <div class="ios-fr">
+        <div class="ios-fg">
+          <label>Bulan</label>
+          <select id="payBulan" class="ios-select"></select>
+        </div>
+        <div class="ios-fg">
+          <label>Tahun</label>
+          <select id="payTahun" class="ios-select"></select>
+        </div>
+      </div>
+      <div id="payKelasRow" class="ios-fg ios-hidden">
+        <label>Kelas</label>
+        <input type="text" id="payKelas" class="ios-input" readonly>
+      </div>
+      <div class="ios-fg">
+        <label>Kategori</label>
+        <select id="payKategori" class="ios-select"></select>
+      </div>
+      <div class="ios-fr">
+        <div class="ios-fg">
+          <label>Tipe Pembayaran</label>
+          <select id="payMetode" class="ios-select">
+            <option value="Cash">Cash</option>
+            <option value="QRIS">QRIS</option>
+          </select>
+        </div>
+        <div class="ios-fg">
+          <label>Jumlah (Rp)</label>
+          <input type="number" id="payJumlah" class="ios-input" placeholder="Otomatis">
+        </div>
+      </div>
+      <div class="ios-fg">
+        <label>Status Bulanan</label>
+        <div id="payMonthGrid" class="ios-mg ios-mt2"></div>
+      </div>
+      <div class="ios-f ios-g2 ios-mt2">
+        <button class="ios-btn ios-btn-success" onclick="simpanPembayaran()" style="flex:1">Tandai Lunas</button>
+        <button class="ios-btn ios-btn-danger" onclick="batalPembayaran()" style="flex:0">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="ios-card">
+    <div class="ios-card-header">
+      <div class="ios-card-title" style="margin-bottom:0">Riwayat Pembayaran</div>
+      <div class="ios-search-group">
+        <span class="ios-search-label">Lembaga</span>
+        <select id="riwayatLembaga" class="ios-select" onchange="loadRiwayat()" style="width:auto">
+        <option value="">Semua</option>
+        <option value="MIS">MIS</option>
+        <option value="MTs">MTs</option>
+        <option value="PAUD">PAUD</option>
+      </select>
+      </div>
+    </div>
+    <div class="ios-table-wrap">
+      <table class="ios-table">
         <thead>
           <tr>
             <th>Tanggal</th>
@@ -380,6 +614,7 @@ tr:hover { background: #f8faff; }
             <th>Lembaga</th>
             <th>Bulan</th>
             <th>Tahun</th>
+            <th>Kategori</th>
             <th>Jumlah</th>
             <th>Tipe</th>
             <th>Aksi</th>
@@ -391,26 +626,32 @@ tr:hover { background: #f8faff; }
   </div>
 </div>
 
-<div id="tab-siswa" class="tab-content hidden">
-  <div class="flex-between mb-2">
-    <h2>Data Siswa</h2>
-    <button class="btn btn-primary" onclick="showTambahSiswa()">+ Tambah Siswa</button>
+<div id="tab-siswa" class="tab-content ios-hidden">
+  <div class="ios-fb ios-mb2">
+    <div class="ios-card-title" style="margin-bottom:0;font-size:17px;color:#1c1c1e;text-transform:none;letter-spacing:0;font-weight:700">Data Siswa</div>
+    <button class="ios-btn ios-btn-primary ios-btn-sm" onclick="showTambahSiswa()">+ Tambah</button>
   </div>
-  <div class="search-box">
-    <input type="text" id="siswaSearch" placeholder="Cari nama siswa..." oninput="loadSiswa()">
-    <select id="siswaLembaga" onchange="loadSiswa()">
-      <option value="">Semua Lembaga</option>
-      <option value="MIS">MIS</option>
-      <option value="MTs">MTs</option>
-      <option value="PAUD">PAUD</option>
-    </select>
-    <select id="siswaKelas" onchange="loadSiswa()">
-      <option value="">Semua Kelas</option>
-    </select>
+  <div class="ios-search">
+    <input type="text" id="siswaSearch" class="ios-input" placeholder="Cari nama siswa..." oninput="loadSiswa()">
+    <div class="ios-search-group">
+      <span class="ios-search-label">Lembaga</span>
+      <select id="siswaLembaga" class="ios-select" onchange="loadSiswa()">
+        <option value="">Semua</option>
+        <option value="MIS">MIS</option>
+        <option value="MTs">MTs</option>
+        <option value="PAUD">PAUD</option>
+      </select>
+    </div>
+    <div class="ios-search-group">
+      <span class="ios-search-label">Kelas</span>
+      <select id="siswaKelas" class="ios-select" onchange="loadSiswa()">
+        <option value="">Semua</option>
+      </select>
+    </div>
   </div>
-  <div class="card">
-    <div style="overflow-x:auto">
-      <table>
+  <div class="ios-card">
+    <div class="ios-table-wrap">
+      <table class="ios-table">
         <thead>
           <tr>
             <th>No</th>
@@ -427,14 +668,14 @@ tr:hover { background: #f8faff; }
   </div>
 </div>
 
-<div id="tab-kategori" class="tab-content hidden">
-  <div class="flex-between mb-2">
-    <h2>Kategori Pembayaran</h2>
-    <button class="btn btn-primary" onclick="showTambahKategori()">+ Tambah Kategori</button>
+<div id="tab-kategori" class="tab-content ios-hidden">
+  <div class="ios-fb ios-mb2">
+    <div class="ios-card-title" style="margin-bottom:0;font-size:17px;color:#1c1c1e;text-transform:none;letter-spacing:0;font-weight:700">Kategori Pembayaran</div>
+    <button class="ios-btn ios-btn-primary ios-btn-sm" onclick="showTambahKategori()">+ Tambah</button>
   </div>
-  <div class="card">
-    <div style="overflow-x:auto">
-      <table>
+  <div class="ios-card">
+    <div class="ios-table-wrap">
+      <table class="ios-table">
         <thead>
           <tr>
             <th>Nama</th>
@@ -449,43 +690,55 @@ tr:hover { background: #f8faff; }
   </div>
 </div>
 
-<div id="tab-laporan" class="tab-content hidden">
-  <div class="flex-between mb-2">
-    <h2>Laporan Tunggakan</h2>
-    <div>
-      <button class="btn btn-success" onclick="downloadLaporanCSV()">⬇ Download CSV</button>
-    </div>
+<div id="tab-laporan" class="tab-content ios-hidden">
+  <div class="ios-fb ios-mb2">
+    <div class="ios-card-title" style="margin-bottom:0;font-size:17px;color:#1c1c1e;text-transform:none;letter-spacing:0;font-weight:700">Laporan Tunggakan</div>
+    <button class="ios-btn ios-btn-success ios-btn-sm" onclick="downloadLaporanPDF()">⬇ PDF</button>
   </div>
-  <div class="card">
-    <div class="form-row" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
-      <select id="lapLembaga" onchange="loadLaporan()" style="width:auto;min-width:120px">
-        <option value="MIS">MIS</option>
-        <option value="MTs">MTs</option>
-        <option value="PAUD">PAUD</option>
-      </select>
-      <select id="lapKelas" onchange="loadLaporan()" style="width:auto;min-width:140px">
-        <option value="">Semua Kelas</option>
-      </select>
-      <select id="lapBulanAwal" onchange="loadLaporan()" style="width:auto;min-width:120px">
-      </select>
-      <select id="lapBulanAkhir" onchange="loadLaporan()" style="width:auto;min-width:120px">
-      </select>
-      <select id="lapTahun" onchange="loadLaporan()" style="width:auto;min-width:100px">
-      </select>
-      <label style="display:flex;align-items:center;gap:4px;font-size:13px">
-        <input type="checkbox" id="lapUnpaidOnly" checked onchange="loadLaporan()"> Hanya tunggakan
+  <div class="ios-card">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <div class="ios-search-group" style="flex:1;min-width:80px">
+        <span class="ios-search-label">Lembaga</span>
+        <select id="lapLembaga" class="ios-select" onchange="loadLaporan()" style="width:auto">
+          <option value="MIS">MIS</option>
+          <option value="MTs">MTs</option>
+          <option value="PAUD">PAUD</option>
+        </select>
+      </div>
+      <div class="ios-search-group" style="flex:1;min-width:80px">
+        <span class="ios-search-label">Kelas</span>
+        <select id="lapKelas" class="ios-select" onchange="loadLaporan()" style="width:auto">
+          <option value="">Semua Kelas</option>
+        </select>
+      </div>
+      <div class="ios-search-group" style="flex:1;min-width:60px">
+        <span class="ios-search-label">Dari</span>
+        <select id="lapBulanAwal" class="ios-select" onchange="loadLaporan()" style="width:auto">
+        </select>
+      </div>
+      <div class="ios-search-group" style="flex:1;min-width:60px">
+        <span class="ios-search-label">Sampai</span>
+        <select id="lapBulanAkhir" class="ios-select" onchange="loadLaporan()" style="width:auto">
+        </select>
+      </div>
+      <div class="ios-search-group" style="flex:1;min-width:60px">
+        <span class="ios-search-label">Tahun</span>
+        <select id="lapTahun" class="ios-select" onchange="loadLaporan()" style="width:auto">
+        </select>
+      </div>
+      <label style="display:flex;align-items:center;gap:4px;font-size:13px;white-space:nowrap">
+        <input type="checkbox" id="lapUnpaidOnly" checked onchange="loadLaporan()"> Tunggakan
       </label>
     </div>
-    <div id="lapSummary" style="margin-bottom:12px;font-size:13px;color:var(--text-secondary)"></div>
-    <div style="overflow-x:auto">
-      <table>
+    <div id="lapSummary" class="ios-gray ios-mb2" style="font-size:13px"></div>
+    <div class="ios-table-wrap">
+      <table class="ios-table">
         <thead>
-          <tr>
+          <tr id="lapHeaderRow">
             <th>No</th>
             <th>Nama</th>
             <th>Kelas</th>
             <th>Nominal</th>
-            <th id="lapMonthHeaders"></th>
             <th>Total Tunggakan</th>
           </tr>
         </thead>
@@ -497,8 +750,35 @@ tr:hover { background: #f8faff; }
 
 </div>
 
-<div id="modal" class="modal hidden">
-  <div class="modal-content" id="modalBody"></div>
+</main>
+
+</div>
+
+<div class="tab-bar">
+  <button class="tab-item active" data-tab="dashboard">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    <span>Dashboard</span>
+  </button>
+  <button class="tab-item" data-tab="bayar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="5" width="22" height="14" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M1 10h22"/></svg>
+    <span>Bayar</span>
+  </button>
+  <button class="tab-item" data-tab="siswa">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span>Siswa</span>
+  </button>
+  <button class="tab-item" data-tab="kategori">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+    <span>Kategori</span>
+  </button>
+  <button class="tab-item" data-tab="laporan">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    <span>Laporan</span>
+  </button>
+</div>
+
+<div id="modal" class="ios-modal-overlay ios-hidden">
+  <div class="ios-modal" id="modalBody"></div>
 </div>
 
 <script>
@@ -520,6 +800,17 @@ const KELAS_ORDER = ['Kelas I','Kelas II','Kelas III','Kelas IV','Kelas V','Kela
 
 const MONTH_MAP = { Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12,Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6 }
 
+function monthDisplay(header) {
+  const [abbr, year] = header.split(' ')
+  const num = MONTH_MAP[abbr]
+  return BULAN_NAMES[num - 1] + ' ' + year
+}
+function monthShortDisplay(header) {
+  const [abbr] = header.split(' ')
+  const num = MONTH_MAP[abbr]
+  return BULAN_NAMES[num - 1]
+}
+
 let paymentChart = null
 let incomeChart = null
 let metodeChart = null
@@ -529,7 +820,7 @@ let selectedPayments = {}
 
 function toast(msg, type = 'success') {
   const t = document.createElement('div')
-  t.className = `toast toast-${type}`
+  t.className = 'ios-toast'
   t.textContent = msg
   document.body.appendChild(t)
   setTimeout(() => t.remove(), 3000)
@@ -539,29 +830,32 @@ function $(id) { return document.getElementById(id) }
 
 function modal(html) {
   $('modalBody').innerHTML = html
-  $('modal').classList.remove('hidden')
+  $('modal').classList.remove('ios-hidden')
 }
 
 function closeModal() {
-  $('modal').classList.add('hidden')
+  $('modal').classList.add('ios-hidden')
 }
 
 $('modal').onclick = (e) => {
   if (e.target === $('modal')) closeModal()
 }
 
-document.querySelectorAll('.tab-nav button').forEach((btn) => {
-  btn.onclick = () => {
-    document.querySelectorAll('.tab-nav button').forEach((b) => b.classList.remove('active'))
-    btn.classList.add('active')
-    document.querySelectorAll('.tab-content').forEach((t) => t.classList.add('hidden'))
-    $(`tab-${btn.dataset.tab}`).classList.remove('hidden')
-    if (btn.dataset.tab === 'dashboard') loadDashboard()
-    if (btn.dataset.tab === 'bayar') { loadRiwayat(); initBayarForm() }
-    if (btn.dataset.tab === 'siswa') loadSiswa()
-    if (btn.dataset.tab === 'kategori') loadKategori()
-    if (btn.dataset.tab === 'laporan') loadLaporan()
-  }
+function switchTab(tab) {
+  document.querySelectorAll('.tab-item, .sidebar-item').forEach((b) => b.classList.remove('active'))
+  document.querySelector(`.tab-item[data-tab="${tab}"]`).classList.add('active')
+  document.querySelector(`.sidebar-item[data-tab="${tab}"]`).classList.add('active')
+  document.querySelectorAll('.tab-content').forEach((t) => t.classList.add('ios-hidden'))
+  $(`tab-${tab}`).classList.remove('ios-hidden')
+  if (tab === 'dashboard') loadDashboard()
+  if (tab === 'bayar') { loadRiwayat(); initBayarForm() }
+  if (tab === 'siswa') loadSiswa()
+  if (tab === 'kategori') loadKategori()
+  if (tab === 'laporan') loadLaporan()
+}
+
+document.querySelectorAll('.tab-item, .sidebar-item[data-tab]').forEach((btn) => {
+  btn.onclick = () => switchTab(btn.dataset.tab)
 })
 
 function init() {
@@ -603,15 +897,15 @@ async function api(path, opts = {}) {
 }
 
 async function refreshAll() {
-  const active = document.querySelector('.tab-nav button.active')
-  if (active) active.click()
+  const active = document.querySelector('.tab-item.active, .sidebar-item.active')
+  if (active) switchTab(active.dataset.tab)
   toast('Data diperbarui')
 }
 
 function badgeLembaga(l) {
-  if (l === 'MIS') return '<span class="badge badge-success">MIS</span>'
-  if (l === 'MTs') return '<span class="badge badge-warning">MTs</span>'
-  return '<span class="badge badge-paud">PAUD</span>'
+  if (l === 'MIS') return '<span class="ios-badge ios-badge-green">MIS</span>'
+  if (l === 'MTs') return '<span class="ios-badge ios-badge-orange">MTs</span>'
+  return '<span class="ios-badge ios-badge-blue">PAUD</span>'
 }
 
 function klasKelas(k) {
@@ -638,10 +932,10 @@ function renderDashboard(data) {
   const thisMonth = stats.find(m => m.bulan === now + 1)
 
   $('dashStats').innerHTML = `
-    <div class="stat-box"><div class="value">${data.totalSiswa}</div><div class="label">Total Siswa</div></div>
-    <div class="stat-box success"><div class="value">${thisMonth ? thisMonth.paidCount : 0}</div><div class="label">Lunas Bulan Ini</div></div>
-    <div class="stat-box warning"><div class="value">${thisMonth ? thisMonth.unpaidCount : 0}</div><div class="label">Belum Bayar</div></div>
-    <div class="stat-box"><div class="value">Rp ${(data.totalPemasukan || 0).toLocaleString('id-ID')}</div><div class="label">Total Pemasukan ${data.tahun}</div></div>
+    <div class="ios-stat"><div class="ios-stat-icon" style="background:#e8f0fe;color:#007aff">👥</div><div class="ios-stat-value">${data.totalSiswa}</div><div class="ios-stat-label">Total Siswa</div></div>
+    <div class="ios-stat"><div class="ios-stat-icon" style="background:#e6f9ed;color:#34c759">✓</div><div class="ios-stat-value ios-green">${thisMonth ? thisMonth.paidCount : 0}</div><div class="ios-stat-label">Lunas Bulan Ini</div></div>
+    <div class="ios-stat"><div class="ios-stat-icon" style="background:#fce8e6;color:#ff3b30">!</div><div class="ios-stat-value ios-red">${thisMonth ? thisMonth.unpaidCount : 0}</div><div class="ios-stat-label">Belum Bayar</div></div>
+    <div class="ios-stat"><div class="ios-stat-icon" style="background:#fef3e0;color:#ff9500">Rp</div><div class="ios-stat-value">${(data.totalPemasukan || 0).toLocaleString('id-ID')}</div><div class="ios-stat-label">Total Pemasukan ${data.tahun}</div></div>
   `
 
   renderPaymentChart(stats)
@@ -747,15 +1041,15 @@ async function loadUnpaidList(lembaga) {
     const unpaid = data.filter(s => !s.payments[header])
 
     if (unpaid.length === 0) {
-      el.innerHTML = '<div class="empty-state">✅ Semua siswa sudah membayar!</div>'
+      el.innerHTML = '<div class="ios-empty">Semua siswa sudah membayar ✓</div>'
       return
     }
-    el.innerHTML = '<div style="max-height:250px;overflow-y:auto"><table><thead><tr><th>Nama</th><th>Detail</th></tr></thead><tbody>' +
-      unpaid.slice(0, 50).map(s => `<tr class="${klasKelas(s.kelas)}"><td>${s.nama}</td><td>${s.kelas || '-'}</td></tr>`).join('') +
-      (unpaid.length > 50 ? `<tr><td colspan="2">...dan ${unpaid.length - 50} lainnya</td></tr>` : '') +
+    el.innerHTML = '<div style="max-height:250px;overflow-y:auto"><table class="ios-table"><thead><tr><th>Nama</th><th>Detail</th></tr></thead><tbody>' +
+      unpaid.slice(0, 50).map(s => `<tr><td class="ios-bold">${s.nama}</td><td class="ios-gray">${s.kelas || '-'}</td></tr>`).join('') +
+      (unpaid.length > 50 ? `<tr><td colspan="2" class="ios-gray ios-tc" style="padding:8px">...dan ${unpaid.length - 50} lainnya</td></tr>` : '') +
       '</tbody></table></div>'
   } catch (e) {
-    el.innerHTML = `<div class="empty-state">Gagal memuat: ${e.message}</div>`
+    el.innerHTML = `<div class="ios-empty">Gagal memuat: ${e.message}</div>`
   }
 }
 
@@ -780,28 +1074,25 @@ async function loadSiswa() {
 function renderSiswa(data) {
   const tbody = $('siswaTable')
   if (data.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Tidak ada siswa</td></tr>'
+    tbody.innerHTML = '<tr><td colspan="6" class="ios-empty">Tidak ada siswa</td></tr>'
     return
   }
   let html = ''
   let prevKelas = null
-  let no = 0
   for (const s of data) {
     if (prevKelas && s.kelas !== prevKelas) {
-      html += '<tr class="separator-row"><td colspan="6"></td></tr>'
+      html += '<tr class="ios-sep"><td colspan="6"></td></tr>'
     }
     prevKelas = s.kelas
-    no++
-    const cls = klasKelas(s.kelas)
-    html += `<tr class="${cls}">
-      <td>${no}</td>
-      <td><strong>${s.nama}</strong></td>
+    html += `<tr>
+      <td class="ios-gray">${s.id}</td>
+      <td class="ios-bold">${s.nama}</td>
       <td>${badgeLembaga(s.lembaga)}</td>
-      <td>${s.kelas || '-'}</td>
-      <td>Rp ${(s.nominalInfaq || 0).toLocaleString('id-ID')}</td>
+      <td class="ios-gray">${s.kelas || '-'}</td>
+      <td class="ios-bold">Rp ${(s.nominalInfaq || 0).toLocaleString('id-ID')}</td>
       <td>
-        <button class="btn btn-sm btn-outline" onclick="editSiswa(${s.id}, '${s.lembaga}')">✏️</button>
-        <button class="btn btn-sm btn-danger" onclick="hapusSiswa(${s.id}, '${s.lembaga}', '${s.nama.replace(/'/g, "\\'")}', event)">🗑️</button>
+        <button class="ios-btn ios-btn-sm ios-btn-ghost" onclick="editSiswa(${s.id}, '${s.lembaga}')">Edit</button>
+        <button class="ios-btn ios-btn-sm ios-btn-danger" onclick="hapusSiswa(${s.id}, '${s.lembaga}', '${s.nama.replace(/'/g, "\\'")}', event)">Hapus</button>
       </td>
     </tr>`
   }
@@ -826,29 +1117,29 @@ async function loadKelasOptions() {
 function showTambahSiswa() {
   modal(`
     <h2>Tambah Siswa Baru</h2>
-    <div class="form-group">
+    <div class="ios-fg">
       <label>Nama Lengkap</label>
-      <input type="text" id="fSiswaNama" placeholder="Nama siswa">
+      <input type="text" id="fSiswaNama" class="ios-input" placeholder="Nama siswa">
     </div>
-    <div class="form-group">
+    <div class="ios-fg">
       <label>Lembaga</label>
-      <select id="fSiswaLembaga" onchange="toggleKelasField()">
+      <select id="fSiswaLembaga" class="ios-select" onchange="toggleKelasField()">
         <option value="MIS">MIS</option>
         <option value="MTs">MTs</option>
         <option value="PAUD">PAUD</option>
       </select>
     </div>
-    <div id="fSiswaKelasGroup" class="form-group">
+    <div id="fSiswaKelasGroup" class="ios-fg">
       <label>Kelas</label>
-      <select id="fSiswaKelas"></select>
+      <select id="fSiswaKelas" class="ios-select"></select>
     </div>
-    <div class="form-group">
+    <div class="ios-fg">
       <label>Nominal Infaq/SPP (Rp)</label>
-      <input type="number" id="fSiswaTarif" placeholder="0">
+      <input type="number" id="fSiswaTarif" class="ios-input" placeholder="0">
     </div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal()">Batal</button>
-      <button class="btn btn-primary" onclick="simpanSiswa()">Simpan</button>
+    <div class="ios-modal-actions">
+      <button class="ios-btn ios-btn-ghost" onclick="closeModal()">Batal</button>
+      <button class="ios-btn ios-btn-primary" onclick="simpanSiswa()">Simpan</button>
     </div>
   `)
   toggleKelasField()
@@ -859,9 +1150,9 @@ function toggleKelasField() {
   const group = $('fSiswaKelasGroup')
   const sel = $('fSiswaKelas')
   if (l === 'PAUD') {
-    group.classList.add('hidden')
+    group.classList.add('ios-hidden')
   } else {
-    group.classList.remove('hidden')
+    group.classList.remove('ios-hidden')
     const kelasList = l === 'MIS'
       ? ['Kelas I', 'Kelas II', 'Kelas III', 'Kelas IV', 'Kelas V', 'Kelas VI']
       : ['Kelas VII', 'Kelas VIII', 'Kelas IX']
@@ -892,29 +1183,29 @@ async function editSiswa(id, lembaga) {
   if (!s) return
   modal(`
     <h2>Edit Siswa</h2>
-    <div class="form-group">
+    <div class="ios-fg">
       <label>Nama Lengkap</label>
-      <input type="text" id="fSiswaNama" value="${s.nama}">
+      <input type="text" id="fSiswaNama" class="ios-input" value="${s.nama}">
     </div>
-    <div class="form-group">
+    <div class="ios-fg">
       <label>Lembaga</label>
-      <select id="fSiswaLembaga" onchange="toggleKelasFieldEdit('${s.kelas || ''}')">
+      <select id="fSiswaLembaga" class="ios-select" onchange="toggleKelasFieldEdit('${s.kelas || ''}')">
         <option value="MIS" ${lembaga === 'MIS' ? 'selected' : ''}>MIS</option>
         <option value="MTs" ${lembaga === 'MTs' ? 'selected' : ''}>MTs</option>
         <option value="PAUD" ${lembaga === 'PAUD' ? 'selected' : ''}>PAUD</option>
       </select>
     </div>
-    <div id="fSiswaKelasGroup" class="form-group ${lembaga === 'PAUD' ? 'hidden' : ''}">
+    <div id="fSiswaKelasGroup" class="ios-fg ${lembaga === 'PAUD' ? 'ios-hidden' : ''}">
       <label>Kelas</label>
-      <select id="fSiswaKelas"></select>
+      <select id="fSiswaKelas" class="ios-select"></select>
     </div>
-    <div class="form-group">
+    <div class="ios-fg">
       <label>Nominal (Rp)</label>
-      <input type="number" id="fSiswaTarif" value="${s.nominalInfaq || 0}">
+      <input type="number" id="fSiswaTarif" class="ios-input" value="${s.nominalInfaq || 0}">
     </div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal()">Batal</button>
-      <button class="btn btn-primary" onclick="updateSiswa(${id}, '${lembaga}')">Simpan</button>
+    <div class="ios-modal-actions">
+      <button class="ios-btn ios-btn-ghost" onclick="closeModal()">Batal</button>
+      <button class="ios-btn ios-btn-primary" onclick="updateSiswa(${id}, '${lembaga}')">Simpan</button>
     </div>
   `)
   toggleKelasFieldEdit(s.kelas || '')
@@ -925,9 +1216,9 @@ function toggleKelasFieldEdit(currentKelas) {
   const group = $('fSiswaKelasGroup')
   const sel = $('fSiswaKelas')
   if (l === 'PAUD') {
-    group.classList.add('hidden')
+    group.classList.add('ios-hidden')
   } else {
-    group.classList.remove('hidden')
+    group.classList.remove('ios-hidden')
     const kelasList = l === 'MIS'
       ? ['Kelas I', 'Kelas II', 'Kelas III', 'Kelas IV', 'Kelas V', 'Kelas VI']
       : ['Kelas VII', 'Kelas VIII', 'Kelas IX']
@@ -964,7 +1255,24 @@ async function hapusSiswa(id, lembaga, nama, event) {
 
 // --- PEMBAYARAN ---
 async function initBayarForm() {
-  try { await api(`/kategori?lembaga=${$('payLembaga').value}`) } catch (e) {}
+  await loadPayKategori($('payLembaga').value)
+}
+
+async function loadPayKategori(lembaga) {
+  const sel = $('payKategori')
+  sel.innerHTML = ''
+  try {
+    const data = await api(`/kategori?lembaga=${lembaga}`)
+    if (data.length === 0) {
+      sel.innerHTML = '<option value="Infaq">Infaq</option>'
+      return
+    }
+    data.forEach(k => {
+      sel.innerHTML += `<option value="${k.nama}">${k.nama}</option>`
+    })
+  } catch (e) {
+    sel.innerHTML = '<option value="Infaq">Infaq</option>'
+  }
 }
 
 let paySearchTimeout = null
@@ -974,22 +1282,26 @@ async function searchSiswaBayar() {
   const lembaga = $('payLembaga').value
   if (q.length < 2) {
     $('paySearchResults').innerHTML = ''
-    batalPembayaran()
+    selectedSiswa = null
+    selectedPayments = {}
+    $('payForm').classList.add('ios-hidden')
     return
   }
   paySearchTimeout = setTimeout(async () => {
     try {
       const data = await api(`/siswa?lembaga=${lembaga}&search=${encodeURIComponent(q)}`)
       if (data.length === 0) {
-        $('paySearchResults').innerHTML = '<div class="empty-state">Siswa tidak ditemukan</div>'
+        $('paySearchResults').innerHTML = '<div class="ios-empty">Siswa tidak ditemukan</div>'
         return
       }
       $('paySearchResults').innerHTML = data.slice(0, 10).map(s => `
-        <div style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center"
-             onmouseover="this.style.background='#f0f4ff'" onmouseout="this.style.background=''"
-             onclick="pilihSiswaBayar(${s.id}, '${s.lembaga}', '${s.nama.replace(/'/g, "\\'")}', '${s.kelas || ''}')" data-nominal="${s.nominalInfaq || 0}">
-          <span><strong>${s.nama}</strong> ${s.kelas ? '— ' + s.kelas : ''}</span>
-          <span>${badgeLembaga(s.lembaga)}</span>
+        <div class="ios-list-item" style="cursor:pointer"
+             onclick="pilihSiswaBayar(${s.id}, '${s.lembaga}', '${s.nama.replace(/'/g, "\\'")}', '${s.kelas || ''}')">
+          <span>
+            <span class="ios-bold">${s.nama}</span>
+            ${s.kelas ? `<br><span class="ios-gray" style="font-size:12px">${s.kelas}</span>` : ''}
+          </span>
+          <span style="margin-left:auto">${badgeLembaga(s.lembaga)}</span>
         </div>
       `).join('')
     } catch (e) {}
@@ -1002,13 +1314,13 @@ async function pilihSiswaBayar(id, lembaga, nama, kelas) {
   $('payLembagaDisplay').value = lembaga
   $('paySearchResults').innerHTML = ''
   $('paySearch').value = nama
-  $('payForm').classList.remove('hidden')
+  $('payForm').classList.remove('ios-hidden')
 
   const kelasRow = $('payKelasRow')
   if (lembaga === 'PAUD') {
-    kelasRow.classList.add('hidden')
+    kelasRow.classList.add('ios-hidden')
   } else {
-    kelasRow.classList.remove('hidden')
+    kelasRow.classList.remove('ios-hidden')
     $('payKelas').value = kelas || ''
   }
 
@@ -1028,11 +1340,9 @@ function renderMonthGrid() {
   const el = $('payMonthGrid')
   el.innerHTML = MONTH_HEADERS.map(m => {
     const paid = selectedPayments[m]
-    const [monthName, year] = m.split(' ')
-    const shortName = monthName.substring(0, 3) + ' ' + year
-    const tip = paid ? paid : 'Kosong'
-    return `<div onclick="togglePayment('${m}')" style="padding:6px 10px;border-radius:6px;border:1px solid var(--border);font-size:12px;cursor:pointer;${paid ? 'background:var(--success);color:white;border-color:var(--success)' : 'background:#fafafa'}" title="${tip}">
-      ${shortName}<br><small>${paid ? paid.replace(/Lunas\s*Rp\d+\s*/,'') : '⬜'}</small>
+    return `<div class="mg-month">
+      <div class="mg-label">${monthDisplay(m)}</div>
+      <button onclick="togglePayment('${m}')" class="mg-status${paid ? ' paid' : ''}">${paid ? '✓' : '×'}</button>
     </div>`
   }).join('')
 }
@@ -1043,11 +1353,11 @@ async function togglePayment(monthHeader) {
   const tahun = parseInt(monthHeader.split(' ')[1])
 
   if (selectedPayments[monthHeader]) {
-    if (!confirm(`Batalkan pembayaran ${monthHeader} untuk ${selectedSiswa.nama}?`)) return
+    if (!confirm(`Batalkan pembayaran ${monthDisplay(monthHeader)} untuk ${selectedSiswa.nama}?`)) return
     try {
       await api(`/pembayaran?lembaga=${selectedSiswa.lembaga}&siswaId=${selectedSiswa.id}&bulan=${bulan}&tahun=${tahun}`, { method: 'DELETE' })
       selectedPayments[monthHeader] = ''
-      toast(`Pembayaran ${monthHeader} dibatalkan`)
+      toast(`Pembayaran ${monthDisplay(monthHeader)} dibatalkan`)
     } catch (e) { toast(e.message, 'error') }
   } else {
     const metode = $('payMetode').value
@@ -1057,11 +1367,11 @@ async function togglePayment(monthHeader) {
         method: 'POST',
         body: JSON.stringify({
           siswaId: selectedSiswa.id, lembaga: selectedSiswa.lembaga,
-          bulan, tahun, jumlah, kategori: 'Infaq', metode,
+          bulan, tahun, jumlah, kategori: $('payKategori').value, metode,
         }),
       })
       selectedPayments[monthHeader] = `Lunas Rp${jumlah} ${metode}`
-      toast(`${selectedSiswa.nama} — ${monthHeader} ✅ ${metode} Rp${(jumlah||0).toLocaleString('id-ID')}`)
+      toast(`${selectedSiswa.nama} — ${monthHeader} ✅ ${$('payKategori').value} ${metode} Rp${(jumlah||0).toLocaleString('id-ID')}`)
     } catch (e) { toast(e.message, 'error') }
   }
   renderMonthGrid()
@@ -1070,7 +1380,7 @@ async function togglePayment(monthHeader) {
 function batalPembayaran() {
   selectedSiswa = null
   selectedPayments = {}
-  $('payForm').classList.add('hidden')
+  $('payForm').classList.add('ios-hidden')
   $('paySearch').value = ''
   $('paySearchResults').innerHTML = ''
 }
@@ -1100,21 +1410,23 @@ async function loadRiwayat() {
   })
   const tbody = $('riwayatTable')
   if (allPayments.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Belum ada pembayaran</td></tr>'
+    tbody.innerHTML = '<tr><td colspan="9" class="ios-empty">Belum ada pembayaran</td></tr>'
     return
   }
   tbody.innerHTML = allPayments.slice(0, 100).map(p => {
     const [m, y] = p.tanggal.split(' ')
     const metode = p.metode || 'Cash'
+    const kategori = p.kategori || 'Infaq'
     return `<tr>
-      <td>${p.tanggal}</td>
-      <td><strong>${p.nama}</strong></td>
+      <td class="ios-gray">${p.tanggal}</td>
+      <td class="ios-bold">${p.nama}</td>
       <td>${badgeLembaga(p.lembaga)}</td>
-      <td>${m || ''}</td>
-      <td>${y || ''}</td>
-      <td><strong>Rp ${(p.jumlah || 0).toLocaleString('id-ID')}</strong></td>
-      <td><span class="badge ${metode === 'QRIS' ? 'badge-success' : 'badge-warning'}">${metode}</span></td>
-      <td><button class="btn btn-sm btn-danger" onclick="hapusPembayaran(${p.siswaId}, '${p.lembaga}', ${p.bulan}, ${p.tahun})">🗑️</button></td>
+      <td class="ios-gray">${m || ''}</td>
+      <td class="ios-gray">${y || ''}</td>
+      <td><span class="ios-badge ios-badge-blue">${kategori}</span></td>
+      <td class="ios-bold">Rp ${(p.jumlah || 0).toLocaleString('id-ID')}</td>
+      <td><span class="ios-badge ${metode === 'QRIS' ? 'ios-badge-green' : 'ios-badge-orange'}">${metode}</span></td>
+      <td><button class="ios-btn ios-btn-sm ios-btn-danger" onclick="hapusPembayaran(${p.siswaId}, '${p.lembaga}', ${p.bulan}, ${p.tahun})">Hapus</button></td>
     </tr>`
   }).join('')
 }
@@ -1134,15 +1446,15 @@ async function loadKategori() {
     const data = await api('/kategori')
     const tbody = $('kategoriTable')
     if (data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Belum ada kategori</td></tr>'
+      tbody.innerHTML = '<tr><td colspan="4" class="ios-empty">Belum ada kategori</td></tr>'
       return
     }
     tbody.innerHTML = data.map(k => `
       <tr>
-        <td><strong>${k.nama}</strong></td>
+        <td class="ios-bold">${k.nama}</td>
         <td>${badgeLembaga(k.lembaga)}</td>
-        <td>Rp ${(k.jumlahDefault || 0).toLocaleString('id-ID')}</td>
-        <td><button class="btn btn-sm btn-danger" onclick="hapusKategori(${k.id}, '${k.nama.replace(/'/g, "\\'")}')">🗑️</button></td>
+        <td class="ios-bold">Rp ${(k.jumlahDefault || 0).toLocaleString('id-ID')}</td>
+        <td><button class="ios-btn ios-btn-sm ios-btn-danger" onclick="hapusKategori(${k.id}, '${k.nama.replace(/'/g, "\\'")}')">Hapus</button></td>
       </tr>
     `).join('')
   } catch (e) { toast(e.message, 'error') }
@@ -1151,26 +1463,26 @@ async function loadKategori() {
 function showTambahKategori() {
   modal(`
     <h2>Tambah Kategori</h2>
-    <div class="form-group">
+    <div class="ios-fg">
       <label>Nama Kategori</label>
-      <input type="text" id="fKatNama" placeholder="Contoh: SPP, Infaq, Seragam, dll">
+      <input type="text" id="fKatNama" class="ios-input" placeholder="Contoh: SPP, Infaq, Seragam, dll">
     </div>
-    <div class="form-group">
+    <div class="ios-fg">
       <label>Lembaga</label>
-      <select id="fKatLembaga">
+      <select id="fKatLembaga" class="ios-select">
         <option value="MIS">MIS</option>
         <option value="MTs">MTs</option>
         <option value="PAUD">PAUD</option>
         <option value="">Semua</option>
       </select>
     </div>
-    <div class="form-group">
+    <div class="ios-fg">
       <label>Jumlah Default (Rp)</label>
-      <input type="number" id="fKatJumlah" placeholder="0">
+      <input type="number" id="fKatJumlah" class="ios-input" placeholder="0">
     </div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal()">Batal</button>
-      <button class="btn btn-primary" onclick="simpanKategori()">Simpan</button>
+    <div class="ios-modal-actions">
+      <button class="ios-btn ios-btn-ghost" onclick="closeModal()">Batal</button>
+      <button class="ios-btn ios-btn-primary" onclick="simpanKategori()">Simpan</button>
     </div>
   `)
 }
@@ -1236,16 +1548,22 @@ async function loadLaporan() {
     $('lapSummary').textContent = `Menampilkan ${data.unpaidSiswa} dari ${data.totalSiswa} siswa dengan tunggakan`
 
     // Month headers
-    const monthLabels = data.months.map(m => {
-      const parts = m.split(' ')
-      return parts[0]
+    const monthLabels = data.months.map(m => monthShortDisplay(m))
+    const headerRow = $('lapHeaderRow')
+    // Clear previous month headers (keep first 4 + total)
+    while (headerRow.children.length > 5) headerRow.removeChild(headerRow.children[4])
+    const totalTh = headerRow.lastElementChild
+    monthLabels.forEach(m => {
+      const th = document.createElement('th')
+      th.style.cssText = 'white-space:nowrap;padding:8px 16px'
+      th.textContent = m
+      headerRow.insertBefore(th, totalTh)
     })
-    $('lapMonthHeaders').innerHTML = monthLabels.map(m => `<th>${m}</th>`).join('')
 
     // Table rows
     const tbody = $('lapTable')
     if (data.siswa.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="999" class="empty-state">Semua siswa sudah lunas ✅</td></tr>'
+      tbody.innerHTML = '<tr><td colspan="999" class="ios-empty">Semua siswa sudah lunas ✅</td></tr>'
       return
     }
 
@@ -1255,21 +1573,21 @@ async function loadLaporan() {
     tbody.innerHTML = data.siswa.map((s, i) => {
       const paymentCells = data.months.map(m => {
         const paid = s.payments[m]
-        return paid ? `<td style="color:var(--success);text-align:center">✅</td>` : `<td style="color:var(--danger);text-align:center">❌</td>`
+        return paid ? `<td class="ios-tc ios-green" style="padding:10px 16px">✓</td>` : `<td class="ios-tc ios-red" style="padding:10px 16px;background:#fde8e8">✗</td>`
       }).join('')
       return `<tr>
-        <td>${i + 1}</td>
-        <td><strong>${s.nama}</strong></td>
-        <td>${s.kelas || '-'}</td>
-        <td>Rp ${(s.nominalInfaq || 0).toLocaleString('id-ID')}</td>
+        <td class="ios-gray">${i + 1}</td>
+        <td class="ios-bold">${s.nama}</td>
+        <td class="ios-gray">${s.kelas || '-'}</td>
+        <td class="ios-bold">Rp ${(s.nominalInfaq || 0).toLocaleString('id-ID')}</td>
         ${paymentCells}
-        <td style="color:var(--danger);font-weight:600">Rp ${(s.totalUnpaidNominal || 0).toLocaleString('id-ID')}</td>
+        <td class="ios-bold ios-red">Rp ${(s.totalUnpaidNominal || 0).toLocaleString('id-ID')}</td>
       </tr>`
     }).join('')
   } catch (e) { toast(e.message, 'error') }
 }
 
-function downloadLaporanCSV() {
+function downloadLaporanPDF() {
   const data = window._lapData
   if (!data || !data.siswa || data.siswa.length === 0) {
     toast('Tidak ada data untuk di-download', 'error')
@@ -1277,21 +1595,38 @@ function downloadLaporanCSV() {
   }
 
   const months = data.months
-  const rows = [['Nama','Kelas','Nominal', ...months.map(m => m.split(' ')[0]), 'Total Tunggakan']]
-  data.siswa.forEach(s => {
-    const payments = months.map(m => s.payments[m] ? 'Lunas' : 'Belum')
-    rows.push([s.nama, s.kelas || '-', s.nominalInfaq || 0, ...payments, s.totalUnpaidNominal || 0])
-  })
+  const monthLabels = months.map(m => monthShortDisplay(m))
+  const headers = ['No', 'Nama', 'Kelas', 'Nominal', ...monthLabels, 'Total Tunggakan']
+  const rows = data.siswa.map((s, i) => [
+    i + 1, s.nama, s.kelas || '-', `Rp ${(s.nominalInfaq || 0).toLocaleString('id-ID')}`,
+    ...months.map(m => s.payments[m] ? '✓' : '✗'),
+    `Rp ${(s.totalUnpaidNominal || 0).toLocaleString('id-ID')}`,
+  ])
 
-  const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n')
-  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' })
-  const a = document.createElement('a')
-  a.href = URL.createObjectURL(blob)
-  a.download = `tunggakan_${data.lembaga}_${data.bulanAwal}-${data.bulanAkhir}_${data.tahun}.csv`
-  a.click()
-  URL.revokeObjectURL(a.href)
+  const { jsPDF } = window.jspdf
+  const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'landscape' })
+  doc.setFontSize(14)
+  doc.text(`Laporan Tunggakan - ${data.lembaga}`, 14, 16)
+  doc.setFontSize(10)
+  doc.text(`Bulan ${data.bulanAwal}-${data.bulanAkhir} Tahun ${data.tahun}`, 14, 23)
+  doc.autoTable({
+    head: [headers],
+    body: rows,
+    startY: 28,
+    styles: { fontSize: 7, cellPadding: 2 },
+    headStyles: { fillColor: [0, 122, 255], fontSize: 7, halign: 'center', valign: 'middle' },
+    columnStyles: {
+      0: { cellWidth: 38 },
+      2: { cellWidth: 22, halign: 'right' },
+    },
+    tableLineColor: [200, 200, 200],
+    tableLineWidth: 0.1,
+  })
+  doc.save(`tunggakan_${data.lembaga}_${data.bulanAwal}-${data.bulanAkhir}_${data.tahun}.pdf`)
   toast('Laporan berhasil di-download')
 }
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
 </body>
 </html>
