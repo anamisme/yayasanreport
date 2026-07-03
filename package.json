@@ -10,5 +10,8 @@
   },
   "devDependencies": {
     "wrangler": "^4.0.0"
+  },
+  "dependencies": {
+    "googleapis": "^173.0.0"
   }
 }

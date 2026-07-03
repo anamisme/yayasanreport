@@ -6,3 +6,4 @@ node_modules/
 *.log
 siswa_paud.json
 process_siswa.py
+*.tar.gz
