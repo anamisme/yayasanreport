@@ -159,11 +159,11 @@ body {
   transition: background 0.2s;
 }
 .ios-select:focus { background: #d1d1d6; }
-.ios-search { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.ios-search .ios-input { flex: 1; min-width: 140px; background: #e5e5ea; font-size: 16px; }
-.ios-search .ios-select { flex: 0 1 auto; min-width: 90px; }
-.ios-search-group { display: flex; flex-direction: column; gap: 2px; }
-.ios-search-label { font-size: 10px; color: #8e8e93; font-weight: 500; letter-spacing: 0.3px; text-transform: uppercase; }
+.ios-search { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.ios-search .ios-input { flex: 1; min-width: 120px; background: #e5e5ea; font-size: 14px; }
+.ios-search .ios-select { flex: 0 1 auto; min-width: 80px; }
+.ios-search-group { display: flex; flex-direction: column; gap: 1px; }
+.ios-search-label { font-size: 9px; color: #8e8e93; font-weight: 500; letter-spacing: 0.2px; text-transform: uppercase; }
 
 /* Buttons */
 .ios-btn {
@@ -585,7 +585,7 @@ body {
   </div>
 
   <div class="ios-card">
-    <div class="ios-card-header" style="flex-wrap:wrap;gap:8px">
+    <div class="ios-card-header" style="flex-wrap:wrap;gap:6px">
       <div class="ios-card-title" style="margin-bottom:0">Riwayat Pembayaran</div>
       <div style="display:flex;gap:6px;align-items:end;flex-wrap:wrap">
         <div class="ios-search-group">
@@ -697,8 +697,8 @@ body {
     <button class="ios-btn ios-btn-success ios-btn-sm" onclick="downloadLaporanPDF()">⬇ PDF</button>
   </div>
   <div class="ios-card">
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-      <div class="ios-search-group" style="flex:1;min-width:80px">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+      <div class="ios-search-group" style="flex:1;min-width:70px">
         <span class="ios-search-label">Lembaga</span>
         <select id="lapLembaga" class="ios-select" onchange="loadLaporan()" style="width:auto">
           <option value="MIS">MIS</option>
@@ -706,23 +706,23 @@ body {
           <option value="PAUD">PAUD</option>
         </select>
       </div>
-      <div class="ios-search-group" style="flex:1;min-width:80px">
+      <div class="ios-search-group" style="flex:1;min-width:70px">
         <span class="ios-search-label">Kelas</span>
         <select id="lapKelas" class="ios-select" onchange="loadLaporan()" style="width:auto">
           <option value="">Semua Kelas</option>
         </select>
       </div>
-      <div class="ios-search-group" style="flex:1;min-width:60px">
+      <div class="ios-search-group" style="flex:1;min-width:55px">
         <span class="ios-search-label">Dari</span>
         <select id="lapBulanAwal" class="ios-select" onchange="loadLaporan()" style="width:auto">
         </select>
       </div>
-      <div class="ios-search-group" style="flex:1;min-width:60px">
+      <div class="ios-search-group" style="flex:1;min-width:55px">
         <span class="ios-search-label">Sampai</span>
         <select id="lapBulanAkhir" class="ios-select" onchange="loadLaporan()" style="width:auto">
         </select>
       </div>
-      <div class="ios-search-group" style="flex:1;min-width:60px">
+      <div class="ios-search-group" style="flex:1;min-width:55px">
         <span class="ios-search-label">Tahun</span>
         <select id="lapTahun" class="ios-select" onchange="loadLaporan()" style="width:auto">
         </select>
