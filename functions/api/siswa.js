@@ -6,15 +6,16 @@ function parseValues(rows, lembaga) {
   const monthCols = MONTH_HEADERS.map((m, i) => ({ month: m, idx: headers.indexOf(m) })).filter(m => m.idx >= 0)
   const isPaud = lembaga === 'PAUD'
   const result = []
+  let seq = 0
   for (let i = 1; i < rows.length; i++) {
     const row = rows[i]
-    const rowNum = i + 1
     if (!row || !row[0] || row[0].startsWith('Jumlah ')) continue
+    seq++
     const kelas = isPaud ? '' : (row[1] || '')
     const nominal = isPaud ? (parseInt(row[1]) || 0) : (parseInt(row[2]) || 0)
     const payments = {}
     monthCols.forEach(mc => { payments[mc.month] = row[mc.idx] || '' })
-    result.push({ id: rowNum, nama: row[0] || '', kelas, nominalInfaq: nominal, payments, lembaga })
+    result.push({ id: seq, nama: row[0] || '', kelas, nominalInfaq: nominal, payments, lembaga })
   }
   return result
 }
