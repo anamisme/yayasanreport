@@ -15,7 +15,7 @@ function parseValues(rows, lembaga) {
     const nominal = isPaud ? (parseInt(row[1]) || 0) : (parseInt(row[2]) || 0)
     const payments = {}
     monthCols.forEach(mc => { payments[mc.month] = row[mc.idx] || '' })
-    result.push({ id: seq, nama: row[0] || '', kelas, nominalInfaq: nominal, payments, lembaga })
+    result.push({ id: seq, row: i + 1, nama: row[0] || '', kelas, nominalInfaq: nominal, payments, lembaga })
   }
   return result
 }

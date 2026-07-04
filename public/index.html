@@ -1446,7 +1446,7 @@ async function searchSiswaBayar() {
       }
       $('paySearchResults').innerHTML = data.slice(0, 10).map(s => `
         <div class="ios-list-item" style="cursor:pointer"
-             onclick='pilihSiswaBayar(${s.id}, ${JSON.stringify(s.lembaga)}, ${JSON.stringify(s.nama)}, ${JSON.stringify(s.kelas || "")})'>
+             onclick='pilihSiswaBayar(${s.id}, ${JSON.stringify(s.lembaga)}, ${JSON.stringify(s.nama)}, ${JSON.stringify(s.kelas || "")}, ${s.row})'>
           <span>
             <span class="ios-bold">${esc(s.nama)}</span>
             ${s.kelas ? `<br><span class="ios-gray" style="font-size:12px">${esc(s.kelas)}</span>` : ''}
@@ -1458,8 +1458,8 @@ async function searchSiswaBayar() {
   }, 300)
 }
 
-async function pilihSiswaBayar(id, lembaga, nama, kelas) {
-  selectedSiswa = { id, lembaga, nama, kelas }
+async function pilihSiswaBayar(id, lembaga, nama, kelas, row) {
+  selectedSiswa = { id, lembaga, nama, kelas, row }
   $('payNama').textContent = nama
   $('payHeaderDetail').innerHTML = `<span style="background:#e8f0fe;color:#007aff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600">${lembaga}</span>${kelas ? `<span>• ${kelas}</span>` : ''}`
   $('paySearchResults').innerHTML = ''
@@ -1506,7 +1506,8 @@ function renderMonthGrid() {
 }
 
 async function togglePayment(monthHeader) {
-  if (!selectedSiswa) return
+  console.log('togglePayment called', monthHeader, selectedSiswa ? selectedSiswa.nama : 'no siswa')
+  if (!selectedSiswa) { toast('Pilih siswa dulu', 'error'); return }
   const bulan = MONTH_MAP[monthHeader.substring(0, 3)]
   const tahun = parseInt(monthHeader.split(' ')[1])
 
@@ -1514,7 +1515,7 @@ async function togglePayment(monthHeader) {
     if (window.userRole !== 'superadmin') { toast('Hanya superadmin yang dapat menghapus pembayaran'); return }
     if (!confirm(`Batalkan pembayaran ${monthDisplay(monthHeader)} untuk ${selectedSiswa.nama}?`)) return
     try {
-      await api(`/pembayaran?lembaga=${selectedSiswa.lembaga}&siswaId=${selectedSiswa.id}&bulan=${bulan}&tahun=${tahun}`, { method: 'DELETE' })
+      await api(`/pembayaran?lembaga=${selectedSiswa.lembaga}&rowId=${selectedSiswa.row}&bulan=${bulan}&tahun=${tahun}`, { method: 'DELETE' })
       selectedPayments[monthHeader] = ''
       toast(`Pembayaran ${monthDisplay(monthHeader)} dibatalkan`)
     } catch (e) { toast(e.message, 'error') }
@@ -1525,7 +1526,7 @@ async function togglePayment(monthHeader) {
       const res = await api(`/pembayaran?lembaga=${selectedSiswa.lembaga}`, {
         method: 'POST',
         body: JSON.stringify({
-          nama: selectedSiswa.nama,
+          rowId: selectedSiswa.row,
           bulan, tahun, jumlah, kategori: $('payKategori').value, metode,
         }),
       })
