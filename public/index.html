@@ -351,6 +351,9 @@ body {
 /* Charts */
 .chart-container { height: 240px; margin-top: 4px; position: relative; }
 
+/* Superadmin-only */
+.superadmin-only { display: none; }
+
 /* Utils */
 .ios-f { display: flex; }
 .ios-fb { display: flex; justify-content: space-between; align-items: center; }
@@ -448,6 +451,7 @@ body {
         <button class="header-item" data-tab="siswa">Siswa</button>
         <button class="header-item" data-tab="kategori">Kategori</button>
         <button class="header-item" data-tab="laporan">Laporan</button>
+        <button class="header-item superadmin-only" data-tab="pengaturan">⚙️ Pengaturan</button>
       </nav>
     </div>
     <div style="display:flex;gap:10px;align-items:center;">
@@ -741,6 +745,28 @@ body {
 
 </div>
 
+<!-- PENGATURAN -->
+<div id="tab-pengaturan" class="tab-content ios-hidden">
+  <div class="ios-card">
+    <div class="ios-card-title">⚙️ Pengaturan Akses</div>
+    <p style="font-size:12px;color:#8e8e93;margin:0 0 12px">Kelola email yang dapat mengakses aplikasi. Superadmin dapat menghapus data, admin hanya bisa input/edit.</p>
+    <div style="margin-bottom:12px">
+      <input type="email" id="aksesEmail" class="ios-input" placeholder="email@example.com" style="margin-bottom:6px">
+      <div class="ios-fr">
+        <select id="aksesRole" class="ios-select">
+          <option value="admin">Admin</option>
+          <option value="superadmin">Superadmin</option>
+        </select>
+        <button class="ios-btn ios-btn-primary" onclick="tambahAkses()" style="white-space:nowrap">+ Tambah</button>
+      </div>
+    </div>
+    <table class="ios-table">
+      <thead><tr><th>Email</th><th>Role</th><th>Ditambahkan</th><th></th></tr></thead>
+      <tbody id="aksesTable"></tbody>
+    </table>
+  </div>
+</div>
+
 </main>
 
 </div>
@@ -765,6 +791,10 @@ body {
   <button class="tab-item" data-tab="laporan">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
     <span>Laporan</span>
+  </button>
+  <button class="tab-item superadmin-only" data-tab="pengaturan">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <span>Pengaturan</span>
   </button>
 </div>
 
@@ -880,6 +910,7 @@ function switchTab(tab) {
   if (tab === 'siswa') loadSiswa()
   if (tab === 'kategori') loadKategori()
   if (tab === 'laporan') loadLaporan()
+  if (tab === 'pengaturan') loadPengaturan()
 }
 
 document.querySelectorAll('.tab-item, .header-item[data-tab]').forEach((btn) => {
@@ -891,6 +922,11 @@ async function init() {
     const me = await api('/me')
     window.userRole = me.role
   } catch (e) { window.userRole = 'admin' }
+  // Show/hide superadmin-only UI
+  const isSuper = window.userRole === 'superadmin'
+  document.querySelectorAll('.superadmin-only').forEach(el => {
+    el.style.display = isSuper ? (el.classList.contains('tab-item') ? 'flex' : '') : 'none'
+  })
   const ySel = $('dashTahun')
   for (let y = 2026; y <= 2027; y++) {
     ySel.innerHTML += `<option value="${y}">${y}</option>`
@@ -1566,6 +1602,49 @@ async function hapusKategori(id, nama) {
     await api(`/kategori?id=${id}`, { method: 'DELETE' })
     toast('Kategori berhasil dihapus')
     loadKategori()
+  } catch (e) { toast(e.message, 'error') }
+}
+
+// --- PENGATURAN AKSES ---
+async function loadPengaturan() {
+  try {
+    const data = await api('/akses')
+    const tbody = $('aksesTable')
+    if (data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" class="ios-empty">Belum ada akses tambahan</td></tr>'
+      return
+    }
+    tbody.innerHTML = data.map(a => `
+      <tr>
+        <td class="ios-bold">${a.email}</td>
+        <td><span class="ios-badge ${a.role === 'superadmin' ? 'ios-badge-red' : 'ios-badge-blue'}">${a.role}</span></td>
+        <td class="ios-gray">${a.addedAt}</td>
+        <td><button class="ios-btn ios-btn-sm ios-btn-danger" onclick="hapusAkses('${a.email}')">Hapus</button></td>
+      </tr>
+    `).join('')
+  } catch (e) { toast(e.message, 'error') }
+}
+
+async function tambahAkses() {
+  const email = $('aksesEmail').value.trim()
+  if (!email) { toast('Email harus diisi', 'error'); return }
+  try {
+    await api('/akses', {
+      method: 'POST',
+      body: JSON.stringify({ email, role: $('aksesRole').value }),
+    })
+    $('aksesEmail').value = ''
+    toast('Akses berhasil ditambahkan')
+    loadPengaturan()
+  } catch (e) { toast(e.message, 'error') }
+}
+
+async function hapusAkses(email) {
+  if (!confirm(`Hapus akses untuk ${email}?`)) return
+  try {
+    await api(`/akses?email=${encodeURIComponent(email)}`, { method: 'DELETE' })
+    toast('Akses berhasil dihapus')
+    loadPengaturan()
   } catch (e) { toast(e.message, 'error') }
 }
 
