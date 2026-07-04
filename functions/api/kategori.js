@@ -87,6 +87,10 @@ export async function onRequest(context) {
     }
 
     if (method === 'DELETE') {
+      const role = request.headers.get('X-User-Role')
+      if (role !== 'superadmin') {
+        return new Response(JSON.stringify({ error: 'Forbidden', message: 'Hanya superadmin yang dapat menghapus data' }), { status: 403, headers })
+      }
       const id = url.searchParams.get('id')
       if (!id) {
         return new Response(JSON.stringify({ error: 'id diperlukan' }), {

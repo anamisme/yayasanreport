@@ -886,7 +886,11 @@ document.querySelectorAll('.tab-item, .header-item[data-tab]').forEach((btn) => 
   btn.onclick = () => switchTab(btn.dataset.tab)
 })
 
-function init() {
+async function init() {
+  try {
+    const me = await api('/me')
+    window.userRole = me.role
+  } catch (e) { window.userRole = 'admin' }
   const ySel = $('dashTahun')
   for (let y = 2026; y <= 2027; y++) {
     ySel.innerHTML += `<option value="${y}">${y}</option>`
@@ -1130,7 +1134,7 @@ function renderSiswa(data) {
       <td class="ios-bold">Rp ${(s.nominalInfaq || 0).toLocaleString('id-ID')}</td>
       <td>
         <button class="ios-btn ios-btn-sm ios-btn-ghost" onclick="editSiswa(${s.id}, '${s.lembaga}')">Edit</button>
-        <button class="ios-btn ios-btn-sm ios-btn-danger" onclick="hapusSiswa(${s.id}, '${s.lembaga}', '${s.nama.replace(/'/g, "\\'")}', event)">Hapus</button>
+        ${window.userRole === 'superadmin' ? `<button class="ios-btn ios-btn-sm ios-btn-danger" onclick="hapusSiswa(${s.id}, '${s.lembaga}', '${s.nama.replace(/'/g, "\\'")}', event)">Hapus</button>` : ''}
       </td>
     </tr>`
   }
@@ -1282,6 +1286,7 @@ async function updateSiswa(id, lembaga) {
 }
 
 async function hapusSiswa(id, lembaga, nama, event) {
+  if (window.userRole !== 'superadmin') { toast('Hanya superadmin yang dapat menghapus data'); return }
   if (event) event.stopPropagation()
   if (!confirm(`Hapus siswa "${nama}"?`)) return
   try {
@@ -1391,7 +1396,7 @@ function renderMonthGrid() {
     return `<div class="mg-month${paid ? ' paid-month' : ' unpaid-month'}">
       <div class="mg-label">${label}</div>
       ${detailHtml}
-      <button onclick="togglePayment('${m}')" class="mg-status${paid ? ' paid' : ''}">${paid ? '✓' : '×'}</button>
+      <button onclick="${paid && window.userRole !== 'superadmin' ? "toast('Hanya superadmin yang dapat menghapus pembayaran')" : `togglePayment('${m}')`}" class="mg-status${paid ? ' paid' : ''}">${paid ? '✓' : '×'}</button>
     </div>`
   }).join('')
 }
@@ -1402,6 +1407,7 @@ async function togglePayment(monthHeader) {
   const tahun = parseInt(monthHeader.split(' ')[1])
 
   if (selectedPayments[monthHeader]) {
+    if (window.userRole !== 'superadmin') { toast('Hanya superadmin yang dapat menghapus pembayaran'); return }
     if (!confirm(`Batalkan pembayaran ${monthDisplay(monthHeader)} untuk ${selectedSiswa.nama}?`)) return
     try {
       await api(`/pembayaran?lembaga=${selectedSiswa.lembaga}&siswaId=${selectedSiswa.id}&bulan=${bulan}&tahun=${tahun}`, { method: 'DELETE' })
@@ -1476,12 +1482,13 @@ async function loadRiwayat() {
       <td><span class="ios-badge ios-badge-blue">${kategori}</span></td>
       <td class="ios-bold">Rp ${(p.jumlah || 0).toLocaleString('id-ID')}</td>
       <td><span class="ios-badge ${metode === 'QRIS' ? 'ios-badge-green' : 'ios-badge-orange'}">${metode}</span></td>
-      <td><button class="ios-btn ios-btn-sm ios-btn-danger" onclick="hapusPembayaran(${p.siswaId}, '${p.lembaga}', ${p.bulan}, ${p.tahun})">Hapus</button></td>
+      ${window.userRole === 'superadmin' ? `<td><button class="ios-btn ios-btn-sm ios-btn-danger" onclick="hapusPembayaran(${p.siswaId}, '${p.lembaga}', ${p.bulan}, ${p.tahun})">Hapus</button></td>` : ''}
     </tr>`
   }).join('')
 }
 
 async function hapusPembayaran(siswaId, lembaga, bulan, tahun) {
+  if (window.userRole !== 'superadmin') { toast('Hanya superadmin yang dapat menghapus data'); return }
   if (!confirm('Hapus pembayaran ini?')) return
   try {
     await api(`/pembayaran?lembaga=${lembaga}&siswaId=${siswaId}&bulan=${bulan}&tahun=${tahun}`, { method: 'DELETE' })
@@ -1504,7 +1511,7 @@ async function loadKategori() {
         <td class="ios-bold">${k.nama}</td>
         <td>${badgeLembaga(k.lembaga)}</td>
         <td class="ios-bold">Rp ${(k.jumlahDefault || 0).toLocaleString('id-ID')}</td>
-        <td><button class="ios-btn ios-btn-sm ios-btn-danger" onclick="hapusKategori(${k.id}, '${k.nama.replace(/'/g, "\\'")}')">Hapus</button></td>
+        ${window.userRole === 'superadmin' ? `<td><button class="ios-btn ios-btn-sm ios-btn-danger" onclick="hapusKategori(${k.id}, '${k.nama.replace(/'/g, "\\'")}')">Hapus</button></td>` : ''}
       </tr>
     `).join('')
   } catch (e) { toast(e.message, 'error') }
@@ -1553,6 +1560,7 @@ async function simpanKategori() {
 }
 
 async function hapusKategori(id, nama) {
+  if (window.userRole !== 'superadmin') { toast('Hanya superadmin yang dapat menghapus data'); return }
   if (!confirm(`Hapus kategori "${nama}"?`)) return
   try {
     await api(`/kategori?id=${id}`, { method: 'DELETE' })

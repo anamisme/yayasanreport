@@ -92,6 +92,10 @@ export async function onRequest(context) {
     }
 
     if (method === 'DELETE') {
+      const role = request.headers.get('X-User-Role')
+      if (role !== 'superadmin') {
+        return new Response(JSON.stringify({ error: 'Forbidden', message: 'Hanya superadmin yang dapat menghapus data' }), { status: 403, headers })
+      }
       const rowId = parseInt(url.searchParams.get('siswaId'))
       const bulan = parseInt(url.searchParams.get('bulan'))
       const tahun = parseInt(url.searchParams.get('tahun'))

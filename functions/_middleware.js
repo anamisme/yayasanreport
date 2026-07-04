@@ -41,9 +41,10 @@ export async function onRequest(context) {
     const tokenInfo = await verifyRes.json();
     
     // Check ALLOWED_EMAILS if configured
+    const userEmail = tokenInfo.email.toLowerCase();
     if (env.ALLOWED_EMAILS) {
       const allowedEmails = env.ALLOWED_EMAILS.split(',').map(e => e.trim().toLowerCase());
-      if (!allowedEmails.includes(tokenInfo.email.toLowerCase())) {
+      if (!allowedEmails.includes(userEmail)) {
         return new Response(JSON.stringify({ error: 'Forbidden', message: 'Email not authorized' }), {
           status: 403,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -51,8 +52,20 @@ export async function onRequest(context) {
       }
     }
 
-    // You could theoretically attach tokenInfo to the request here if downstream functions need it
-    // request.user = tokenInfo; // Not easily done in standard fetch Request, but can pass via headers if needed.
+    // Determine role: superadmin if in SUPERADMIN_EMAILS, otherwise admin
+    let role = 'admin';
+    if (env.SUPERADMIN_EMAILS) {
+      const superadminEmails = env.SUPERADMIN_EMAILS.split(',').map(e => e.trim().toLowerCase());
+      if (superadminEmails.includes(userEmail)) {
+        role = 'superadmin';
+      }
+    }
+
+    // Forward user info to downstream handlers via headers
+    const newHeaders = new Headers(request.headers);
+    newHeaders.set('X-User-Role', role);
+    newHeaders.set('X-User-Email', userEmail);
+    context.request = new Request(request, { headers: newHeaders });
     } catch (error) {
       return new Response(JSON.stringify({ error: 'Internal Server Error', message: 'Failed to verify token' }), {
         status: 500,
@@ -62,7 +75,7 @@ export async function onRequest(context) {
   }
   // --- End Authentication ---
 
-  const response = await next()
+  const response = await next(context.request)
   Object.keys(corsHeaders).forEach((key) => {
     response.headers.set(key, corsHeaders[key])
   })
