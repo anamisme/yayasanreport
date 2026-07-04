@@ -548,7 +548,7 @@ body {
         </div>
       </div>
 
-      <div class="ios-fr">
+      <div class="ios-fr" style="grid-template-columns:1fr 1fr 1fr">
         <div class="ios-fg">
           <label>Bulan</label>
           <select id="payBulan" class="ios-select"></select>
@@ -557,16 +557,16 @@ body {
           <label>Tahun</label>
           <select id="payTahun" class="ios-select"></select>
         </div>
+        <div class="ios-fg">
+          <label>Kategori</label>
+          <select id="payKategori" class="ios-select"></select>
+        </div>
       </div>
-      <div id="payKelasRow" class="ios-hidden ios-fg">
-        <label>Kelas</label>
-        <input type="text" id="payKelas" class="ios-input" readonly>
-      </div>
-      <div class="ios-fg">
-        <label>Kategori</label>
-        <select id="payKategori" class="ios-select"></select>
-      </div>
-      <div class="ios-fr">
+      <div class="ios-fr" style="grid-template-columns:1fr 1fr 1fr">
+        <div id="payKelasRow" class="ios-fg ios-hidden">
+          <label>Kelas</label>
+          <input type="text" id="payKelas" class="ios-input" readonly>
+        </div>
         <div class="ios-fg">
           <label>Tipe</label>
           <select id="payMetode" class="ios-select">
