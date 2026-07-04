@@ -1490,15 +1490,12 @@ function renderMonthGrid() {
   const el = $('payMonthGrid')
   el.innerHTML = MONTH_HEADERS.map(m => {
     const raw = selectedPayments[m] || ''
-    const parts = raw.match(/Lunas\s*Rp(\d+)\s*(Cash|QRIS)\s*\|\s*(.+)/i)
     const paid = !!raw
-    const nominal = parts ? parseInt(parts[1]) : 0
-    const metode = parts ? parts[2].toLowerCase() : ''
+    const nominal = parseInt(raw.replace(/\D/g, '')) || 0
     const label = monthShortDisplay(m)
     let detailHtml = ''
     if (paid && nominal > 0) {
       detailHtml = `<div class="mg-nominal">Rp${nominal.toLocaleString('id-ID')}</div>`
-      if (metode) detailHtml += `<div class="mg-badge ${metode}">${metode === 'qris' ? '📱' : '💰'} ${metode}</div>`
     }
     return `<div class="mg-month${paid ? ' paid-month' : ' unpaid-month'}">
       <div class="mg-label">${label}</div>
@@ -1532,9 +1529,8 @@ async function togglePayment(monthHeader) {
           bulan, tahun, jumlah, kategori: $('payKategori').value, metode,
         }),
       })
-      const kategori = $('payKategori').value
-      selectedPayments[monthHeader] = `Lunas Rp${jumlah} ${metode} | ${kategori}`
-      toast(`${selectedSiswa.nama} — ${monthHeader} ✅ ${kategori} ${metode} Rp${(jumlah||0).toLocaleString('id-ID')}`)
+      selectedPayments[monthHeader] = String(jumlah)
+      toast(`${selectedSiswa.nama} — ${monthHeader} ✅ ${$('payKategori').value} ${metode} Rp${(jumlah||0).toLocaleString('id-ID')}`)
     } catch (e) { toast(e.message, 'error') }
   }
   renderMonthGrid()

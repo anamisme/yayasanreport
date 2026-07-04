@@ -45,7 +45,7 @@ export async function onRequest(context) {
       }
 
       const kategori = body.kategori || 'Infaq'
-      const value = `Lunas Rp${jumlah} ${metode} | ${kategori}`
+      const value = String(jumlah)
       rows[rowId - 1][monthColIdx] = value
       const colLetter = String.fromCharCode(65 + monthColIdx)
       await updateSheet(token, sheetId, `${lembaga}!${colLetter}${rowId}`, [value])
@@ -83,7 +83,7 @@ export async function onRequest(context) {
       }
 
       const kategori = body.kategori || 'Infaq'
-      const value = `Lunas Rp${jumlah} ${metode} | ${kategori}`
+      const value = String(jumlah)
       rows[rowId - 1][monthColIdx] = value
       const colLetter = String.fromCharCode(65 + monthColIdx)
       await updateSheet(token, sheetId, `${lembaga}!${colLetter}${rowId}`, [value])
@@ -144,17 +144,14 @@ export async function onRequest(context) {
       monthCols.forEach((ci, mi) => {
         if (ci >= 0 && row[ci]) {
           const raw = row[ci]
-          // Parse: "Lunas Rp50000 QRIS" or "Lunas Rp0 Cash"
-          const parts = raw.match(/Lunas\s*Rp(\d+)\s*(Cash|QRIS)\s*\|\s*(.+)/i)
-          const jumlah = parts ? parseInt(parts[1]) : (parseInt(raw.replace(/\D/g, '')) || 0)
-          const metode = parts ? parts[2] : 'Cash'
-          const kategori = parts ? parts[3].trim() : 'Infaq'
+          const jumlah = parseInt(raw.replace(/\D/g, '')) || 0
+          if (jumlah <= 0) return
           payments.push({
             id: i, siswaId: i + 1, nama: row[0],
             kelas: lembaga === 'PAUD' ? '' : (row[1] || ''),
             bulan: mi < 6 ? mi + 7 : mi - 5,
             tahun: mi < 6 ? 2026 : 2027,
-            jumlah, metode, kategori,
+            jumlah, metode: 'Cash', kategori: 'Infaq',
             lembaga,
             tanggal: MONTH_HEADERS[mi],
           })

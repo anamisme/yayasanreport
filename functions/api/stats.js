@@ -46,12 +46,9 @@ export async function onRequest(context) {
         const val = colIdx >= 0 ? (row[colIdx] || '') : ''
         if (val) {
           paidCount++
-          const parts = val.match(/Lunas\s*Rp(\d+)\s*(Cash|QRIS)\s*\|\s*(.+)/i) || val.match(/Lunas\s*Rp(\d+)\s*(Cash|QRIS)/i)
-          const num = parts ? parseInt(parts[1]) : (parseInt(val.replace(/\D/g, '')) || 0)
-          const metode = parts ? parts[2] : 'Cash'
+          const num = parseInt(val.replace(/\D/g, '')) || 0
           totalBayar += num
-          if (metode === 'QRIS') { mQris += num; cQris++ }
-          else { mCash += num; cCash++ }
+          mCash += num; cCash++
         }
       }
       totalCash += mCash; totalQris += mQris
@@ -78,8 +75,7 @@ export async function onRequest(context) {
         if (colIdx < 0) continue
         const val = row[colIdx] || ''
         if (val) {
-          const parts = val.match(/Lunas\s*Rp(\d+)/i)
-          const num = parts ? parseInt(parts[1]) : 0
+          const num = parseInt(val.replace(/\D/g, '')) || 0
           kelasMap[kelas].totalBayar += num
           if (mi === 0) kelasMap[kelas].paidCount++
         }
