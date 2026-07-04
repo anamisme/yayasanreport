@@ -3,14 +3,14 @@ import { getGoogleAuthToken, getSheet, appendSheet, updateSheet, deleteSheetRow,
 function parseValues(rows, lembaga) {
   if (!rows || rows.length < 2) return []
   const headers = rows[0] || []
-  const monthCols = MONTH_HEADERS.map(m => headers.indexOf(m)).filter(i => i >= 0)
+  const monthCols = MONTH_HEADERS.map((m, i) => ({ month: m, idx: headers.indexOf(m) })).filter(m => m.idx >= 0)
   const isPaud = lembaga === 'PAUD'
   return rows.slice(1).map((row, i) => {
     const rowNum = i + 2
     const kelas = isPaud ? '' : (row[1] || '')
     const nominal = isPaud ? (parseInt(row[1]) || 0) : (parseInt(row[2]) || 0)
     const payments = {}
-    monthCols.forEach((ci, mi) => { payments[MONTH_HEADERS[mi]] = row[ci] || '' })
+    monthCols.forEach(mc => { payments[mc.month] = row[mc.idx] || '' })
     return { id: rowNum, nama: row[0] || '', kelas, nominalInfaq: nominal, payments, lembaga }
   }).filter(s => s.nama && !s.nama.startsWith('Jumlah '))
 }
