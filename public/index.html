@@ -160,8 +160,8 @@ body {
 }
 .ios-select:focus { background: #d1d1d6; }
 .ios-search { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
-.ios-search > * { flex: 1 1 0; min-width: 80px; }
-.ios-search .ios-input { background: #e5e5ea; font-size: 14px; padding: 10px 14px; }
+.ios-search .ios-input { flex: 1; min-width: 120px; background: #e5e5ea; font-size: 14px; padding: 10px 14px; }
+.ios-search .ios-select { flex: 0 1 auto; min-width: 80px; }
 .ios-search-group { display: flex; flex-direction: column; gap: 1px; }
 .ios-search-label { font-size: 9px; color: #8e8e93; font-weight: 500; letter-spacing: 0.2px; text-transform: uppercase; }
 
@@ -511,18 +511,28 @@ body {
 </div>
 
 <div id="tab-bayar" class="tab-content ios-hidden">
-    <div class="ios-card">
-    <div class="ios-card-title">Catat Pembayaran</div>
-    <div class="ios-search">
-      <input type="text" id="paySearch" class="ios-input" placeholder="Cari nama siswa..." oninput="searchSiswaBayar()">
-      <div class="ios-search-group">
+  <div class="ios-fb ios-mb2">
+    <div class="ios-card-title" style="margin-bottom:0;font-size:17px;color:#1c1c1e;text-transform:none;letter-spacing:0;font-weight:700">Catat Pembayaran</div>
+  </div>
+  <div class="ios-card">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+      <div class="ios-search-group" style="flex:1;min-width:80px">
         <span class="ios-search-label">Lembaga</span>
-        <select id="payLembaga" class="ios-select" onchange="searchSiswaBayar();loadPayKategori(this.value)">
+        <select id="payLembaga" class="ios-select" onchange="payLembagaChange()" style="width:auto">
           <option value="MIS">MIS</option>
           <option value="MTs">MTs</option>
           <option value="PAUD">PAUD</option>
         </select>
       </div>
+      <div class="ios-search-group" id="payKelasGroup" style="flex:1;min-width:80px">
+        <span class="ios-search-label">Kelas</span>
+        <select id="payKelas" class="ios-select" onchange="searchSiswaBayar()" style="width:auto">
+          <option value="">Semua Kelas</option>
+        </select>
+      </div>
+    </div>
+    <div class="ios-search">
+      <input type="text" id="paySearch" class="ios-input" placeholder="Cari nama siswa..." oninput="searchSiswaBayar()">
     </div>
     <div id="paySearchResults" class="ios-mb2"></div>
 
@@ -698,7 +708,7 @@ body {
   </div>
   <div class="ios-card">
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
-      <div class="ios-search-group" style="flex:1 1 0;min-width:70px">
+      <div class="ios-search-group" style="flex:1;min-width:70px">
         <span class="ios-search-label">Lembaga</span>
         <select id="lapLembaga" class="ios-select" onchange="loadLaporan()" style="width:auto">
           <option value="MIS">MIS</option>
@@ -706,23 +716,23 @@ body {
           <option value="PAUD">PAUD</option>
         </select>
       </div>
-      <div class="ios-search-group" style="flex:1 1 0;min-width:70px">
+      <div class="ios-search-group" style="flex:1;min-width:70px">
         <span class="ios-search-label">Kelas</span>
         <select id="lapKelas" class="ios-select" onchange="loadLaporan()" style="width:auto">
           <option value="">Semua Kelas</option>
         </select>
       </div>
-      <div class="ios-search-group" style="flex:1 1 0;min-width:55px">
+      <div class="ios-search-group" style="flex:1;min-width:55px">
         <span class="ios-search-label">Dari</span>
         <select id="lapBulanAwal" class="ios-select" onchange="loadLaporan()" style="width:auto">
         </select>
       </div>
-      <div class="ios-search-group" style="flex:1 1 0;min-width:55px">
+      <div class="ios-search-group" style="flex:1;min-width:55px">
         <span class="ios-search-label">Sampai</span>
         <select id="lapBulanAkhir" class="ios-select" onchange="loadLaporan()" style="width:auto">
         </select>
       </div>
-      <div class="ios-search-group" style="flex:1 1 0;min-width:55px">
+      <div class="ios-search-group" style="flex:1;min-width:55px">
         <span class="ios-search-label">Tahun</span>
         <select id="lapTahun" class="ios-select" onchange="loadLaporan()" style="width:auto">
         </select>
@@ -1340,6 +1350,7 @@ async function hapusSiswa(id, lembaga, nama, event) {
 
 // --- PEMBAYARAN ---
 async function initBayarForm() {
+  payLembagaChange()
   await loadPayKategori($('payLembaga').value)
 }
 
@@ -1361,10 +1372,29 @@ async function loadPayKategori(lembaga) {
 }
 
 let paySearchTimeout = null
+function payLembagaChange() {
+  const lembaga = $('payLembaga').value
+  const sel = $('payKelas')
+  const group = $('payKelasGroup')
+  if (lembaga === 'PAUD') {
+    group.style.display = 'none'
+    sel.value = ''
+  } else {
+    group.style.display = ''
+    const kelasList = lembaga === 'MIS'
+      ? ['Kelas I', 'Kelas II', 'Kelas III', 'Kelas IV', 'Kelas V', 'Kelas VI']
+      : ['Kelas VII', 'Kelas VIII', 'Kelas IX']
+    sel.innerHTML = `<option value="">Semua Kelas</option>${kelasList.map(k => `<option value="${k}">${k}</option>`).join('')}`
+  }
+  searchSiswaBayar()
+  loadPayKategori(lembaga)
+}
+
 async function searchSiswaBayar() {
   clearTimeout(paySearchTimeout)
   const q = $('paySearch').value.trim()
   const lembaga = $('payLembaga').value
+  const kelas = $('payKelas').value
   if (q.length < 2) {
     $('paySearchResults').innerHTML = ''
     selectedSiswa = null
@@ -1374,7 +1404,9 @@ async function searchSiswaBayar() {
   }
   paySearchTimeout = setTimeout(async () => {
     try {
-      const data = await api(`/siswa?lembaga=${lembaga}&search=${encodeURIComponent(q)}`)
+      let data = await api(`/siswa?lembaga=${lembaga}&search=${encodeURIComponent(q)}`)
+      // Filter client-side by kelas if selected
+      if (kelas) data = data.filter(s => s.kelas === kelas)
       if (data.length === 0) {
         $('paySearchResults').innerHTML = '<div class="ios-empty">Siswa tidak ditemukan</div>'
         return
