@@ -328,14 +328,21 @@ body {
 
 /* Month Grid */
 .ios-mg { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 4px; }
-.ios-mg .mg-month { text-align: center; padding: 4px; }
-.ios-mg .mg-label { font-size: 11px; color: #3a3a3c; font-weight: 600; margin-bottom: 4px; }
+.ios-mg .mg-month { text-align: center; padding: 4px; border-radius: 8px; }
+.ios-mg .mg-month.paid-month { background: #e6f9ed; }
+.ios-mg .mg-month.unpaid-month { }
+.ios-mg .mg-label { font-size: 11px; color: #3a3a3c; font-weight: 600; margin-bottom: 2px; }
+.ios-mg .mg-nominal { font-size: 10px; font-weight: 600; color: #34c759; margin-bottom: 2px; }
+.ios-mg .mg-badge { display: inline-block; font-size: 9px; font-weight: 600; padding: 1px 6px; border-radius: 4px; margin-bottom: 2px; }
+.ios-mg .mg-badge.cash { background: #e8f0fe; color: #007aff; }
+.ios-mg .mg-badge.qris { background: #f0e6ff; color: #7c3aed; }
 .ios-mg .mg-status {
-  display: block; width: 100%; padding: 6px 0; border-radius: 8px; font-size: 15px; font-weight: 600;
-  cursor: pointer; border: none; font-family: inherit; text-align: center; transition: all 0.15s;
+  display: block; width: 100%; padding: 4px 0; border-radius: 6px; font-size: 13px; font-weight: 600;
+  cursor: pointer; border: 1px solid rgba(60,60,67,0.08); font-family: inherit; text-align: center; transition: all 0.15s;
   background: #f2f2f7; color: #ff3b30;
 }
-.ios-mg .mg-status.paid { background: #34c759; color: white; }
+.ios-mg .mg-status:hover { opacity: 0.8; }
+.ios-mg .mg-status.paid { background: #34c759; color: white; border-color: #34c759; box-shadow: 0 1px 3px rgba(52,199,89,0.3); }
 
 /* Empty & Separator */
 .ios-empty { text-align: center; padding: 24px 16px; color: #8e8e93; font-size: 15px; }
@@ -445,9 +452,7 @@ body {
     </div>
     <div style="display:flex;gap:10px;align-items:center;">
       <button class="ios-btn ios-btn-sm ios-btn-primary d-none-mobile" onclick="switchTab('bayar');$('payForm').classList.remove('ios-hidden');setTimeout(function(){document.getElementById('paySearch').focus()},200)">+ Pembayaran</button>
-      <button class="nav-btn" onclick="refreshAll()" title="Muat Ulang">⟳</button>
-      <button class="nav-btn d-none-mobile" onclick="logout()" title="Log Out" style="color:#ff3b30;">🚪</button>
-      <button class="nav-btn d-lg-none" onclick="logout()" title="Log Out" style="color:#ff3b30;">🚪</button>
+      <button class="nav-btn" onclick="logout()" title="Keluar" style="color:#ff3b30;width:auto;border-radius:20px;padding:0 14px;font-size:13px;font-weight:500;gap:4px">🚪 Keluar</button>
     </div>
 </nav>
 
@@ -511,54 +516,72 @@ body {
     <div id="paySearchResults" class="ios-mb2"></div>
 
     <div id="payForm" class="ios-hidden">
-      <div class="ios-fr">
-        <div class="ios-fg">
-          <label>Nama Siswa</label>
-          <input type="text" id="payNama" class="ios-input" readonly>
-        </div>
-        <div class="ios-fg">
-          <label>Lembaga</label>
-          <input type="text" id="payLembagaDisplay" class="ios-input" readonly>
-        </div>
-      </div>
-      <div class="ios-fr">
-        <div class="ios-fg">
-          <label>Bulan</label>
-          <select id="payBulan" class="ios-select"></select>
-        </div>
-        <div class="ios-fg">
-          <label>Tahun</label>
-          <select id="payTahun" class="ios-select"></select>
+      <!-- Header Siswa -->
+      <div id="payHeader" class="ios-fb ios-mb2" style="padding:12px;background:#f2f2f7;border-radius:12px;gap:0">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:40px;height:40px;border-radius:20px;background:#007aff;color:white;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0">👤</div>
+          <div>
+            <div id="payNama" style="font-size:16px;font-weight:600"></div>
+            <div id="payHeaderDetail" style="font-size:13px;color:#8e8e93;display:flex;gap:6px;align-items:center"></div>
+          </div>
         </div>
       </div>
-      <div id="payKelasRow" class="ios-fg ios-hidden">
-        <label>Kelas</label>
-        <input type="text" id="payKelas" class="ios-input" readonly>
-      </div>
-      <div class="ios-fg">
-        <label>Kategori</label>
-        <select id="payKategori" class="ios-select"></select>
-      </div>
-      <div class="ios-fr">
-        <div class="ios-fg">
-          <label>Tipe Pembayaran</label>
-          <select id="payMetode" class="ios-select">
-            <option value="Cash">Cash</option>
-            <option value="QRIS">QRIS</option>
-          </select>
+
+      <!-- Periode -->
+      <div style="background:#f8f9fa;border-radius:10px;padding:12px;margin-bottom:10px">
+        <div style="font-size:12px;font-weight:600;color:#8e8e93;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">Periode Pembayaran</div>
+        <div class="ios-fr">
+          <div class="ios-fg">
+            <label style="font-size:12px">Bulan</label>
+            <select id="payBulan" class="ios-select"></select>
+          </div>
+          <div class="ios-fg">
+            <label style="font-size:12px">Tahun</label>
+            <select id="payTahun" class="ios-select"></select>
+          </div>
         </div>
-        <div class="ios-fg">
-          <label>Jumlah (Rp)</label>
-          <input type="number" id="payJumlah" class="ios-input" placeholder="Otomatis">
+        <div id="payKelasRow" class="ios-hidden" style="margin-top:8px">
+          <label style="font-size:12px">Kelas</label>
+          <input type="text" id="payKelas" class="ios-input" readonly>
         </div>
       </div>
-      <div class="ios-fg">
-        <label>Status Bulanan</label>
-        <div id="payMonthGrid" class="ios-mg ios-mt2"></div>
+
+      <!-- Detail Pembayaran -->
+      <div style="background:#f8f9fa;border-radius:10px;padding:12px;margin-bottom:10px">
+        <div style="font-size:12px;font-weight:600;color:#8e8e93;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">Detail Pembayaran</div>
+        <div class="ios-fg">
+          <label style="font-size:12px">Kategori</label>
+          <select id="payKategori" class="ios-select"></select>
+        </div>
+        <div class="ios-fr">
+          <div class="ios-fg">
+            <label style="font-size:12px">Tipe</label>
+            <select id="payMetode" class="ios-select">
+              <option value="Cash">💰 Cash</option>
+              <option value="QRIS">📱 QRIS</option>
+            </select>
+          </div>
+          <div class="ios-fg">
+            <label style="font-size:12px">Jumlah</label>
+            <div style="display:flex;align-items:center;gap:4px">
+              <span style="font-size:15px;color:#8e8e93">Rp</span>
+              <input type="number" id="payJumlah" class="ios-input" placeholder="0" style="flex:1">
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="ios-f ios-g2 ios-mt2">
-        <button class="ios-btn ios-btn-success" onclick="simpanPembayaran()" style="flex:1">Tandai Lunas</button>
-        <button class="ios-btn ios-btn-danger" onclick="batalPembayaran()" style="flex:0">Batal</button>
+
+      <!-- Status Bulanan -->
+      <div style="background:#f8f9fa;border-radius:10px;padding:12px;margin-bottom:10px">
+        <div style="font-size:12px;font-weight:600;color:#8e8e93;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px">Status Bulanan</div>
+        <div style="font-size:11px;color:#8e8e93;margin-bottom:8px">Klik ✓ untuk tandai lunas, klik × untuk batalkan</div>
+        <div id="payMonthGrid" class="ios-mg"></div>
+      </div>
+
+      <!-- Tombol Aksi -->
+      <div class="ios-f ios-g2">
+        <button class="ios-btn ios-btn-success" onclick="simpanPembayaran()" style="flex:1;padding:14px;font-size:16px">✅ Tandai Lunas</button>
+        <button class="ios-btn ios-btn-danger" onclick="batalPembayaran()" style="flex:0;padding:14px;font-size:16px">❌ Batal</button>
       </div>
     </div>
   </div>
@@ -1325,8 +1348,8 @@ async function searchSiswaBayar() {
 
 async function pilihSiswaBayar(id, lembaga, nama, kelas) {
   selectedSiswa = { id, lembaga, nama, kelas }
-  $('payNama').value = nama
-  $('payLembagaDisplay').value = lembaga
+  $('payNama').textContent = nama
+  $('payHeaderDetail').innerHTML = `<span style="background:#e8f0fe;color:#007aff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600">${lembaga}</span>${kelas ? `<span>• ${kelas}</span>` : ''}`
   $('paySearchResults').innerHTML = ''
   $('paySearch').value = nama
   $('payForm').classList.remove('ios-hidden')
@@ -1354,9 +1377,20 @@ async function pilihSiswaBayar(id, lembaga, nama, kelas) {
 function renderMonthGrid() {
   const el = $('payMonthGrid')
   el.innerHTML = MONTH_HEADERS.map(m => {
-    const paid = selectedPayments[m]
-    return `<div class="mg-month">
-      <div class="mg-label">${monthDisplay(m)}</div>
+    const raw = selectedPayments[m] || ''
+    const parts = raw.match(/Lunas\s*Rp(\d+)\s*(Cash|QRIS)\s*\|\s*(.+)/i)
+    const paid = !!raw
+    const nominal = parts ? parseInt(parts[1]) : 0
+    const metode = parts ? parts[2].toLowerCase() : ''
+    const label = monthShortDisplay(m)
+    let detailHtml = ''
+    if (paid && nominal > 0) {
+      detailHtml = `<div class="mg-nominal">Rp${nominal.toLocaleString('id-ID')}</div>`
+      if (metode) detailHtml += `<div class="mg-badge ${metode}">${metode === 'qris' ? '📱' : '💰'} ${metode}</div>`
+    }
+    return `<div class="mg-month${paid ? ' paid-month' : ' unpaid-month'}">
+      <div class="mg-label">${label}</div>
+      ${detailHtml}
       <button onclick="togglePayment('${m}')" class="mg-status${paid ? ' paid' : ''}">${paid ? '✓' : '×'}</button>
     </div>`
   }).join('')
@@ -1385,8 +1419,9 @@ async function togglePayment(monthHeader) {
           bulan, tahun, jumlah, kategori: $('payKategori').value, metode,
         }),
       })
-      selectedPayments[monthHeader] = `Lunas Rp${jumlah} ${metode}`
-      toast(`${selectedSiswa.nama} — ${monthHeader} ✅ ${$('payKategori').value} ${metode} Rp${(jumlah||0).toLocaleString('id-ID')}`)
+      const kategori = $('payKategori').value
+      selectedPayments[monthHeader] = `Lunas Rp${jumlah} ${metode} | ${kategori}`
+      toast(`${selectedSiswa.nama} — ${monthHeader} ✅ ${kategori} ${metode} Rp${(jumlah||0).toLocaleString('id-ID')}`)
     } catch (e) { toast(e.message, 'error') }
   }
   renderMonthGrid()
