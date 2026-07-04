@@ -1522,10 +1522,10 @@ async function togglePayment(monthHeader) {
     const metode = $('payMetode').value
     const jumlah = parseInt($('payJumlah').value) || selectedSiswa.nominalInfaq || 0
     try {
-      await api('/pembayaran', {
+      await api(`/pembayaran?lembaga=${selectedSiswa.lembaga}`, {
         method: 'POST',
         body: JSON.stringify({
-          siswaId: selectedSiswa.id, lembaga: selectedSiswa.lembaga,
+          siswaId: selectedSiswa.id,
           bulan, tahun, jumlah, kategori: $('payKategori').value, metode,
         }),
       })
