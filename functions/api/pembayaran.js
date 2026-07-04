@@ -81,7 +81,7 @@ export async function onRequest(context) {
         }
       }
       if (targetIdx < 0) {
-        return new Response(JSON.stringify({ error: 'siswa tidak ditemukan' }), { status: 404, headers })
+        return new Response(JSON.stringify({ error: 'siswa tidak ditemukan', debug: { targetId, totalRows: rows.length, lembaga } }), { status: 404, headers })
       }
 
       const headersRow = rows[0] || []
@@ -91,13 +91,14 @@ export async function onRequest(context) {
       }
 
       const kategori = body.kategori || 'Infaq'
+      const oldValue = rows[targetIdx][monthColIdx] || ''
       const value = String(jumlah)
       rows[targetIdx][monthColIdx] = value
       const colLetter = String.fromCharCode(65 + monthColIdx)
       const rowNum = targetIdx + 1
       await updateSheet(token, sheetId, `${lembaga}!${colLetter}${rowNum}`, [value])
 
-      return new Response(JSON.stringify({ success: true, rowId: rowNum, bulan, tahun, jumlah, metode, kategori }), { status: 201, headers })
+      return new Response(JSON.stringify({ success: true, rowId: rowNum, targetName: rows[targetIdx][0], bulan, tahun, jumlah, metode, kategori, oldValue, newValue: value, debug: { targetId, targetIdx, rowNum, lembaga } }), { status: 201, headers })
     }
 
     if (method === 'DELETE') {
@@ -156,16 +157,19 @@ export async function onRequest(context) {
     const tahunParam = url.searchParams.get('tahun')
 
       let payments = []
+      let validCount = 0
       for (let i = 1; i < values.length; i++) {
         const row = values[i]
         if (!row[0] || row[0].startsWith('Jumlah ')) continue
+        validCount++
+        const sid = validCount
       monthCols.forEach((ci, mi) => {
         if (ci >= 0 && row[ci]) {
           const raw = row[ci]
           const jumlah = parseInt(raw.replace(/\D/g, '')) || 0
           if (jumlah <= 0) return
           payments.push({
-            id: i, siswaId: i + 1, nama: row[0],
+            id: i, siswaId: sid, nama: row[0],
             kelas: lembaga === 'PAUD' ? '' : (row[1] || ''),
             bulan: mi < 6 ? mi + 7 : mi - 5,
             tahun: mi < 6 ? 2026 : 2027,
