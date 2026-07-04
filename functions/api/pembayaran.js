@@ -55,13 +55,13 @@ export async function onRequest(context) {
 
     if (method === 'POST') {
       const body = await request.json()
-      const rowId = parseInt(body.siswaId)
+      const targetId = parseInt(body.siswaId)
       const bulan = parseInt(body.bulan)
       const tahun = parseInt(body.tahun)
       const jumlah = parseInt(body.jumlah) || 0
       const metode = body.metode || 'Cash'
 
-      if (!rowId || !bulan || !tahun) {
+      if (!targetId || !bulan || !tahun) {
         return new Response(JSON.stringify({ error: 'siswaId, bulan, tahun diperlukan' }), { status: 400, headers })
       }
 
@@ -72,7 +72,15 @@ export async function onRequest(context) {
 
       const data = await getSheet(token, sheetId, `${lembaga}!A:ZZ`)
       const rows = data.values || []
-      if (rowId >= rows.length) {
+      let targetIdx = -1
+      let count = 0
+      for (let i = 1; i < rows.length; i++) {
+        if (rows[i] && rows[i][0] && !rows[i][0].startsWith('Jumlah ')) {
+          count++
+          if (count === targetId) { targetIdx = i; break }
+        }
+      }
+      if (targetIdx < 0) {
         return new Response(JSON.stringify({ error: 'siswa tidak ditemukan' }), { status: 404, headers })
       }
 
@@ -84,11 +92,12 @@ export async function onRequest(context) {
 
       const kategori = body.kategori || 'Infaq'
       const value = String(jumlah)
-      rows[rowId - 1][monthColIdx] = value
+      rows[targetIdx][monthColIdx] = value
       const colLetter = String.fromCharCode(65 + monthColIdx)
-      await updateSheet(token, sheetId, `${lembaga}!${colLetter}${rowId}`, [value])
+      const rowNum = targetIdx + 1
+      await updateSheet(token, sheetId, `${lembaga}!${colLetter}${rowNum}`, [value])
 
-      return new Response(JSON.stringify({ success: true, rowId, bulan, tahun, jumlah, metode, kategori }), { status: 201, headers })
+      return new Response(JSON.stringify({ success: true, rowId: rowNum, bulan, tahun, jumlah, metode, kategori }), { status: 201, headers })
     }
 
     if (method === 'DELETE') {
@@ -111,7 +120,15 @@ export async function onRequest(context) {
 
       const data = await getSheet(token, sheetId, `${lembaga}!A:ZZ`)
       const rows = data.values || []
-      if (rowId >= rows.length) {
+      let targetIdx = -1
+      let count = 0
+      for (let i = 1; i < rows.length; i++) {
+        if (rows[i] && rows[i][0] && !rows[i][0].startsWith('Jumlah ')) {
+          count++
+          if (count === rowId) { targetIdx = i; break }
+        }
+      }
+      if (targetIdx < 0) {
         return new Response(JSON.stringify({ error: 'siswa tidak ditemukan' }), { status: 404, headers })
       }
 
@@ -121,9 +138,10 @@ export async function onRequest(context) {
         return new Response(JSON.stringify({ error: 'kolom bulan tidak ditemukan' }), { status: 500, headers })
       }
 
-      rows[rowId - 1][monthColIdx] = ''
+      rows[targetIdx][monthColIdx] = ''
       const colLetter = String.fromCharCode(65 + monthColIdx)
-      await updateSheet(token, sheetId, `${lembaga}!${colLetter}${rowId}`, [''])
+      const rowNum = targetIdx + 1
+      await updateSheet(token, sheetId, `${lembaga}!${colLetter}${rowNum}`, [''])
 
       return new Response(JSON.stringify({ deleted: true }), { headers })
     }
