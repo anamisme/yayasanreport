@@ -413,7 +413,7 @@ body {
   .ios-container { padding: 16px 24px 24px; }
   .metode-charts { flex-direction: row; }
 }
-}
+
 </style>
 </head>
 <body>
@@ -856,6 +856,8 @@ let metodePieChart = null
 let selectedSiswa = null
 let selectedPayments = {}
 
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;') }
+
 function showLogin() {
   $('loginOverlay').style.display = 'flex';
   document.body.style.overflow = 'hidden';
@@ -1141,11 +1143,11 @@ async function loadUnpaidList(lembaga) {
       return
     }
     el.innerHTML = '<div style="max-height:250px;overflow-y:auto"><table class="ios-table"><thead><tr><th>Nama</th><th>Detail</th></tr></thead><tbody>' +
-      unpaid.slice(0, 50).map(s => `<tr><td class="ios-bold">${s.nama}</td><td class="ios-gray">${s.kelas || '-'}</td></tr>`).join('') +
+      unpaid.slice(0, 50).map(s => `<tr><td class="ios-bold">${esc(s.nama)}</td><td class="ios-gray">${esc(s.kelas || '-')}</td></tr>`).join('') +
       (unpaid.length > 50 ? `<tr><td colspan="2" class="ios-gray ios-tc" style="padding:8px">...dan ${unpaid.length - 50} lainnya</td></tr>` : '') +
       '</tbody></table></div>'
   } catch (e) {
-    el.innerHTML = `<div class="ios-empty">Gagal memuat: ${e.message}</div>`
+    el.innerHTML = `<div class="ios-empty">Gagal memuat: ${esc(e.message)}</div>`
   }
 }
 
@@ -1199,13 +1201,13 @@ function renderSiswa(data) {
     prevKelas = s.kelas
     html += `<tr>
       <td class="ios-gray">${s.id}</td>
-      <td class="ios-bold">${s.nama}</td>
+      <td class="ios-bold">${esc(s.nama)}</td>
       <td>${badgeLembaga(s.lembaga)}</td>
-      <td class="ios-gray">${s.kelas || '-'}</td>
+      <td class="ios-gray">${esc(s.kelas || '-')}</td>
       <td class="ios-bold" style="white-space:nowrap">Rp ${(s.nominalInfaq || 0).toLocaleString('id-ID')}</td>
       <td>
-        <button class="ios-btn ios-btn-sm ios-btn-ghost" onclick="editSiswa(${s.id}, '${s.lembaga}')">Edit</button>
-        ${window.userRole === 'superadmin' ? `<button class="ios-btn ios-btn-sm ios-btn-danger" onclick="hapusSiswa(${s.id}, '${s.lembaga}', '${s.nama.replace(/'/g, "\\'")}', event)">Hapus</button>` : ''}
+        <button class="ios-btn ios-btn-sm ios-btn-ghost" onclick="editSiswa(${s.id}, ${JSON.stringify(s.lembaga)})">Edit</button>
+        ${window.userRole === 'superadmin' ? `<button class="ios-btn ios-btn-sm ios-btn-danger" onclick="hapusSiswa(${s.id}, ${JSON.stringify(s.lembaga)}, ${JSON.stringify(s.nama)}, event)">Hapus</button>` : ''}
       </td>
     </tr>`
   }
@@ -1283,11 +1285,11 @@ async function editSiswa(id, lembaga) {
     <h2>Edit Siswa</h2>
     <div class="ios-fg">
       <label>Nama Lengkap</label>
-      <input type="text" id="fSiswaNama" class="ios-input" value="${s.nama}">
+      <input type="text" id="fSiswaNama" class="ios-input" value="${esc(s.nama)}">
     </div>
     <div class="ios-fg">
       <label>Lembaga</label>
-      <select id="fSiswaLembaga" class="ios-select" onchange="toggleKelasFieldEdit('${s.kelas || ''}')">
+      <select id="fSiswaLembaga" class="ios-select" onchange="toggleKelasFieldEdit(${JSON.stringify(s.kelas || '')})">
         <option value="MIS" ${lembaga === 'MIS' ? 'selected' : ''}>MIS</option>
         <option value="MTs" ${lembaga === 'MTs' ? 'selected' : ''}>MTs</option>
         <option value="PAUD" ${lembaga === 'PAUD' ? 'selected' : ''}>PAUD</option>
@@ -1303,7 +1305,7 @@ async function editSiswa(id, lembaga) {
     </div>
     <div class="ios-modal-actions">
       <button class="ios-btn ios-btn-ghost" onclick="closeModal()">Batal</button>
-      <button class="ios-btn ios-btn-primary" onclick="updateSiswa(${id}, '${lembaga}')">Simpan</button>
+      <button class="ios-btn ios-btn-primary" onclick="updateSiswa(${id}, ${JSON.stringify(lembaga)})">Simpan</button>
     </div>
   `)
   toggleKelasFieldEdit(s.kelas || '')
@@ -1417,10 +1419,10 @@ async function searchSiswaBayar() {
       }
       $('paySearchResults').innerHTML = data.slice(0, 10).map(s => `
         <div class="ios-list-item" style="cursor:pointer"
-             onclick="pilihSiswaBayar(${s.id}, '${s.lembaga}', '${s.nama.replace(/'/g, "\\'")}', '${s.kelas || ''}')">
+             onclick="pilihSiswaBayar(${s.id}, ${JSON.stringify(s.lembaga)}, ${JSON.stringify(s.nama)}, ${JSON.stringify(s.kelas || '')})">
           <span>
-            <span class="ios-bold">${s.nama}</span>
-            ${s.kelas ? `<br><span class="ios-gray" style="font-size:12px">${s.kelas}</span>` : ''}
+            <span class="ios-bold">${esc(s.nama)}</span>
+            ${s.kelas ? `<br><span class="ios-gray" style="font-size:12px">${esc(s.kelas)}</span>` : ''}
           </span>
           <span style="margin-left:auto">${badgeLembaga(s.lembaga)}</span>
         </div>
@@ -1556,14 +1558,14 @@ async function loadRiwayat() {
     const kategori = p.kategori || 'Infaq'
     return `<tr>
       <td class="ios-gray">${p.tanggal}</td>
-      <td class="ios-bold">${p.nama}</td>
+      <td class="ios-bold">${esc(p.nama)}</td>
       <td>${badgeLembaga(p.lembaga)}</td>
-      <td class="ios-gray">${p.kelas || '-'}</td>
+      <td class="ios-gray">${esc(p.kelas || '-')}</td>
       <td class="ios-gray">${m || ''}</td>
       <td class="ios-gray">${y || ''}</td>
-      <td><span class="ios-badge ios-badge-blue">${kategori}</span></td>
+      <td><span class="ios-badge ios-badge-blue">${esc(kategori)}</span></td>
       <td class="ios-bold">Rp ${(p.jumlah || 0).toLocaleString('id-ID')}</td>
-      <td><span class="ios-badge ${metode === 'QRIS' ? 'ios-badge-green' : 'ios-badge-orange'}">${metode}</span></td>
+      <td><span class="ios-badge ${metode === 'QRIS' ? 'ios-badge-green' : 'ios-badge-orange'}">${esc(metode)}</span></td>
       ${window.userRole === 'superadmin' ? `<td><button class="ios-btn ios-btn-sm ios-btn-danger" onclick="hapusPembayaran(${p.siswaId}, '${p.lembaga}', ${p.bulan}, ${p.tahun})">Hapus</button></td>` : ''}
     </tr>`
   }).join('')
@@ -1607,10 +1609,10 @@ async function loadKategori() {
     }
     tbody.innerHTML = data.map(k => `
       <tr>
-        <td class="ios-bold">${k.nama}</td>
+        <td class="ios-bold">${esc(k.nama)}</td>
         <td>${badgeLembaga(k.lembaga)}</td>
         <td class="ios-bold">Rp ${(k.jumlahDefault || 0).toLocaleString('id-ID')}</td>
-        ${window.userRole === 'superadmin' ? `<td><button class="ios-btn ios-btn-sm ios-btn-danger" onclick="hapusKategori(${k.id}, '${k.nama.replace(/'/g, "\\'")}')">Hapus</button></td>` : ''}
+        ${window.userRole === 'superadmin' ? `<td><button class="ios-btn ios-btn-sm ios-btn-danger" onclick="hapusKategori(${k.id}, ${JSON.stringify(k.nama)})">Hapus</button></td>` : ''}
       </tr>
     `).join('')
   } catch (e) { toast(e.message, 'error') }
@@ -1679,10 +1681,10 @@ async function loadPengaturan() {
     }
     tbody.innerHTML = data.map(a => `
       <tr>
-        <td class="ios-bold">${a.email}</td>
-        <td><span class="ios-badge ${a.role === 'superadmin' ? 'ios-badge-red' : 'ios-badge-blue'}">${a.role}</span></td>
-        <td class="ios-gray">${a.addedAt}</td>
-        <td><button class="ios-btn ios-btn-sm ios-btn-danger" onclick="hapusAkses('${a.email}')">Hapus</button></td>
+        <td class="ios-bold">${esc(a.email)}</td>
+        <td><span class="ios-badge ${a.role === 'superadmin' ? 'ios-badge-red' : 'ios-badge-blue'}">${esc(a.role)}</span></td>
+        <td class="ios-gray">${esc(a.addedAt)}</td>
+        <td><button class="ios-btn ios-btn-sm ios-btn-danger" onclick="hapusAkses(${JSON.stringify(a.email)})">Hapus</button></td>
       </tr>
     `).join('')
   } catch (e) { toast(e.message, 'error') }
@@ -1778,8 +1780,8 @@ async function loadLaporan() {
       }).join('')
       return `<tr>
         <td class="ios-gray">${i + 1}</td>
-        <td class="ios-bold">${s.nama}</td>
-        <td class="ios-gray">${s.kelas || '-'}</td>
+        <td class="ios-bold">${esc(s.nama)}</td>
+        <td class="ios-gray">${esc(s.kelas || '-')}</td>
         <td class="ios-bold" style="white-space:nowrap">Rp ${(s.nominalInfaq || 0).toLocaleString('id-ID')}</td>
         ${paymentCells}
         <td class="ios-bold ios-red" style="white-space:nowrap">Rp ${(s.totalUnpaidNominal || 0).toLocaleString('id-ID')}</td>

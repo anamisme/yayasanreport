@@ -36,8 +36,22 @@ export async function onRequest(context) {
 
   if (method === 'OPTIONS') return new Response(null, { headers })
 
-  // Only superadmin (from env var) can manage access
-  const role = request.headers.get('X-User-Role')
+  // Only superadmin can manage access: check env var first, then Akses sheet
+  const email = request.headers.get('X-User-Email') || ''
+  let role = request.headers.get('X-User-Role') || 'admin'
+  if (role !== 'superadmin' && email) {
+    try {
+      const token = await getGoogleAuthToken(env)
+      const data = await getSheet(token, env.GOOGLE_SHEET_ID, 'Akses!A:B')
+      const rows = data.values || []
+      const match = rows.slice(1).find(r => (r[0] || '').toLowerCase() === email)
+      if (match && match[1] === 'superadmin') {
+        role = 'superadmin'
+      }
+    } catch (e) {
+      // Sheet Akses might not exist yet
+    }
+  }
   if (role !== 'superadmin') {
     return new Response(JSON.stringify({ error: 'Forbidden', message: 'Hanya superadmin yang dapat mengelola akses' }), {
       status: 403, headers,
