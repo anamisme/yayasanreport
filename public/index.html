@@ -642,25 +642,27 @@ body {
     <div class="ios-card-title" style="margin-bottom:0;font-size:17px;color:#1c1c1e;text-transform:none;letter-spacing:0;font-weight:700">Data Siswa</div>
     <button class="ios-btn ios-btn-primary ios-btn-sm" onclick="showTambahSiswa()">+ Tambah</button>
   </div>
-  <div class="ios-search">
-    <input type="text" id="siswaSearch" class="ios-input" placeholder="Cari nama siswa..." oninput="loadSiswa()">
-    <div class="ios-search-group">
-      <span class="ios-search-label">Lembaga</span>
-      <select id="siswaLembaga" class="ios-select" onchange="loadKelasOptions(this.value)">
-        <option value="">Semua</option>
-        <option value="MIS">MIS</option>
-        <option value="MTs">MTs</option>
-        <option value="PAUD">PAUD</option>
-      </select>
-    </div>
-    <div class="ios-search-group" id="siswaKelasGroup">
-      <span class="ios-search-label">Kelas</span>
-      <select id="siswaKelas" class="ios-select" onchange="loadSiswa()">
-        <option value="">Semua</option>
-      </select>
-    </div>
-  </div>
   <div class="ios-card">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+      <div class="ios-search-group" style="flex:1;min-width:80px">
+        <span class="ios-search-label">Lembaga</span>
+        <select id="siswaLembaga" class="ios-select" onchange="loadKelasOptions(this.value)" style="width:auto">
+          <option value="">Semua</option>
+          <option value="MIS">MIS</option>
+          <option value="MTs">MTs</option>
+          <option value="PAUD">PAUD</option>
+        </select>
+      </div>
+      <div class="ios-search-group" id="siswaKelasGroup" style="flex:1;min-width:80px">
+        <span class="ios-search-label">Kelas</span>
+        <select id="siswaKelas" class="ios-select" onchange="loadSiswa()" style="width:auto">
+          <option value="">Semua</option>
+        </select>
+      </div>
+    </div>
+    <div class="ios-search">
+      <input type="text" id="siswaSearch" class="ios-input" placeholder="Cari nama siswa..." oninput="loadSiswa()">
+    </div>
     <div class="ios-table-wrap">
       <table class="ios-table">
         <thead>
