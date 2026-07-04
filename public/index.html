@@ -160,8 +160,8 @@ body {
 }
 .ios-select:focus { background: #d1d1d6; }
 .ios-search { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
-.ios-search .ios-input { flex: 1; min-width: 120px; background: #e5e5ea; font-size: 14px; }
-.ios-search .ios-select { flex: 0 1 auto; min-width: 80px; }
+.ios-search > * { flex: 1 1 0; min-width: 80px; }
+.ios-search .ios-input { background: #e5e5ea; font-size: 14px; padding: 10px 14px; }
 .ios-search-group { display: flex; flex-direction: column; gap: 1px; }
 .ios-search-label { font-size: 9px; color: #8e8e93; font-weight: 500; letter-spacing: 0.2px; text-transform: uppercase; }
 
@@ -698,7 +698,7 @@ body {
   </div>
   <div class="ios-card">
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
-      <div class="ios-search-group" style="flex:1;min-width:70px">
+      <div class="ios-search-group" style="flex:1 1 0;min-width:70px">
         <span class="ios-search-label">Lembaga</span>
         <select id="lapLembaga" class="ios-select" onchange="loadLaporan()" style="width:auto">
           <option value="MIS">MIS</option>
@@ -706,23 +706,23 @@ body {
           <option value="PAUD">PAUD</option>
         </select>
       </div>
-      <div class="ios-search-group" style="flex:1;min-width:70px">
+      <div class="ios-search-group" style="flex:1 1 0;min-width:70px">
         <span class="ios-search-label">Kelas</span>
         <select id="lapKelas" class="ios-select" onchange="loadLaporan()" style="width:auto">
           <option value="">Semua Kelas</option>
         </select>
       </div>
-      <div class="ios-search-group" style="flex:1;min-width:55px">
+      <div class="ios-search-group" style="flex:1 1 0;min-width:55px">
         <span class="ios-search-label">Dari</span>
         <select id="lapBulanAwal" class="ios-select" onchange="loadLaporan()" style="width:auto">
         </select>
       </div>
-      <div class="ios-search-group" style="flex:1;min-width:55px">
+      <div class="ios-search-group" style="flex:1 1 0;min-width:55px">
         <span class="ios-search-label">Sampai</span>
         <select id="lapBulanAkhir" class="ios-select" onchange="loadLaporan()" style="width:auto">
         </select>
       </div>
-      <div class="ios-search-group" style="flex:1;min-width:55px">
+      <div class="ios-search-group" style="flex:1 1 0;min-width:55px">
         <span class="ios-search-label">Tahun</span>
         <select id="lapTahun" class="ios-select" onchange="loadLaporan()" style="width:auto">
         </select>
