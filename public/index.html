@@ -352,7 +352,7 @@ body {
 .chart-container { height: 240px; margin-top: 4px; position: relative; }
 
 /* Superadmin-only */
-.superadmin-only { display: none; }
+.superadmin-only { }
 
 /* Utils */
 .ios-f { display: flex; }
@@ -925,7 +925,7 @@ async function init() {
   // Show/hide superadmin-only UI
   const isSuper = window.userRole === 'superadmin'
   document.querySelectorAll('.superadmin-only').forEach(el => {
-    el.style.display = isSuper ? (el.classList.contains('tab-item') ? 'flex' : '') : 'none'
+    el.style.display = isSuper ? '' : 'none'
   })
   const ySel = $('dashTahun')
   for (let y = 2026; y <= 2027; y++) {
