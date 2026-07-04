@@ -55,14 +55,14 @@ export async function onRequest(context) {
 
     if (method === 'POST') {
       const body = await request.json()
-      const targetId = parseInt(body.siswaId)
+      const nama = body.nama
       const bulan = parseInt(body.bulan)
       const tahun = parseInt(body.tahun)
       const jumlah = parseInt(body.jumlah) || 0
       const metode = body.metode || 'Cash'
 
-      if (!targetId || !bulan || !tahun) {
-        return new Response(JSON.stringify({ error: 'siswaId, bulan, tahun diperlukan' }), { status: 400, headers })
+      if (!nama || !bulan || !tahun) {
+        return new Response(JSON.stringify({ error: 'nama, bulan, tahun diperlukan' }), { status: 400, headers })
       }
 
       const mi = getMonthIdx(bulan, tahun)
@@ -73,15 +73,13 @@ export async function onRequest(context) {
       const data = await getSheet(token, sheetId, `${lembaga}!A:ZZ`)
       const rows = data.values || []
       let targetIdx = -1
-      let count = 0
       for (let i = 1; i < rows.length; i++) {
-        if (rows[i] && rows[i][0] && !rows[i][0].startsWith('Jumlah ')) {
-          count++
-          if (count === targetId) { targetIdx = i; break }
+        if (rows[i] && rows[i][0] && rows[i][0].trim() === nama) {
+          targetIdx = i; break
         }
       }
       if (targetIdx < 0) {
-        return new Response(JSON.stringify({ error: 'siswa tidak ditemukan', debug: { targetId, totalRows: rows.length, lembaga } }), { status: 404, headers })
+        return new Response(JSON.stringify({ error: 'siswa tidak ditemukan', debug: { nama, totalRows: rows.length, lembaga } }), { status: 404, headers })
       }
 
       const headersRow = rows[0] || []
@@ -98,7 +96,7 @@ export async function onRequest(context) {
       const rowNum = targetIdx + 1
       await updateSheet(token, sheetId, `${lembaga}!${colLetter}${rowNum}`, [value])
 
-      return new Response(JSON.stringify({ success: true, rowId: rowNum, targetName: rows[targetIdx][0], bulan, tahun, jumlah, metode, kategori, oldValue, newValue: value, debug: { targetId, targetIdx, rowNum, lembaga } }), { status: 201, headers })
+      return new Response(JSON.stringify({ success: true, rowId: rowNum, targetName: rows[targetIdx][0], bulan, tahun, jumlah, metode, kategori, oldValue, newValue: value }), { status: 201, headers })
     }
 
     if (method === 'DELETE') {

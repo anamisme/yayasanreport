@@ -1522,15 +1522,15 @@ async function togglePayment(monthHeader) {
     const metode = $('payMetode').value
     const jumlah = parseInt($('payJumlah').value) || selectedSiswa.nominalInfaq || 0
     try {
-      await api(`/pembayaran?lembaga=${selectedSiswa.lembaga}`, {
+      const res = await api(`/pembayaran?lembaga=${selectedSiswa.lembaga}`, {
         method: 'POST',
         body: JSON.stringify({
-          siswaId: selectedSiswa.id,
+          nama: selectedSiswa.nama,
           bulan, tahun, jumlah, kategori: $('payKategori').value, metode,
         }),
       })
       selectedPayments[monthHeader] = String(jumlah)
-      toast(`${selectedSiswa.nama} — ${monthHeader} ✅ ${$('payKategori').value} ${metode} Rp${(jumlah||0).toLocaleString('id-ID')}`)
+      toast(`${selectedSiswa.nama} — ${monthHeader} ✅ ${$('payKategori').value} ${metode} Rp${(jumlah||0).toLocaleString('id-ID')} [debug: wrote to "${res.targetName}" row ${res.rowId}]`)
     } catch (e) { toast(e.message, 'error') }
   }
   renderMonthGrid()
