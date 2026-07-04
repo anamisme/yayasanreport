@@ -1,4 +1,7 @@
-name = "yayasanreport"
+name = "spp-infaq"
 compatibility_date = "2026-07-01"
 pages_build_output_dir = "public"
+
+# Production env vars (set via Cloudflare dashboard: Settings > Environment variables)
+# SUPERADMIN_EMAILS = "email1@example.com,email2@example.com"
 
