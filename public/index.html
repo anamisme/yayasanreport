@@ -29,16 +29,17 @@ body {
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border-bottom: 0.5px solid rgba(60,60,67,0.08);
-  padding: 8px 20px;
+  padding: 10px 16px;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
+  min-height: 52px;
 }
-.nav-bar .nav-title { font-size: 18px; font-weight: 700; letter-spacing: 0.37px; line-height: 1.2; }
-.nav-bar .nav-sub { font-size: 13px; color: #8e8e93; margin-top: 2px; letter-spacing: -0.08px; }
+.nav-bar .nav-title { font-size: 17px; font-weight: 700; letter-spacing: 0.3px; line-height: 1.2; }
+.nav-bar .nav-sub { font-size: 11px; color: #8e8e93; margin-top: 1px; letter-spacing: 0; }
 .nav-btn {
   width: 36px; height: 36px;
-  border-radius: 50%;
+  border-radius: 20px;
   border: none;
   background: rgba(60,60,67,0.06);
   color: #007aff;
@@ -49,23 +50,26 @@ body {
   justify-content: center;
   transition: all 0.2s;
   flex-shrink: 0;
-  margin-top: 4px;
 }
 .nav-btn:active { background: rgba(60,60,67,0.12); transform: scale(0.92); }
 
 /* Container */
-.ios-container { max-width: 1200px; margin: 0 auto; padding: 10px 16px 20px; }
+.ios-container { max-width: 1200px; margin: 0 auto; padding: 8px 12px 16px; }
+@media (min-width: 480px) {
+  .ios-container { padding: 10px 16px 20px; }
+}
 
 /* Cards */
 .ios-card {
   background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+  border-radius: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04), 0 2px 6px rgba(0,0,0,0.02);
   padding: 16px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
-.ios-card-title { font-size: 13px; font-weight: 600; color: #8e8e93; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
-.ios-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.ios-card-title { font-size: 12px; font-weight: 600; color: #8e8e93; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 12px; }
+.ios-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; flex-wrap: wrap; }
+.ios-card-header .ios-select { min-width: 120px; }
 
 /* Stats Grid */
 .ios-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
@@ -73,8 +77,8 @@ body {
 .ios-stat {
   background: #ffffff;
   border-radius: 14px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
-  padding: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04), 0 2px 6px rgba(0,0,0,0.02);
+  padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -155,11 +159,11 @@ body {
   transition: background 0.2s;
 }
 .ios-select:focus { background: #d1d1d6; }
-.ios-search { display: flex; gap: 8px; margin-bottom: 10px; }
-.ios-search .ios-input { flex: 1; background: #e5e5ea; font-size: 17px; }
-.ios-search .ios-select { width: auto; min-width: 100px; }
+.ios-search { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.ios-search .ios-input { flex: 1; min-width: 140px; background: #e5e5ea; font-size: 16px; }
+.ios-search .ios-select { flex: 0 1 auto; min-width: 90px; }
 .ios-search-group { display: flex; flex-direction: column; gap: 2px; }
-.ios-search-label { font-size: 11px; color: #8e8e93; font-weight: 500; letter-spacing: 0.3px; text-transform: uppercase; }
+.ios-search-label { font-size: 10px; color: #8e8e93; font-weight: 500; letter-spacing: 0.3px; text-transform: uppercase; }
 
 /* Buttons */
 .ios-btn {
@@ -187,9 +191,9 @@ body {
 .ios-btn-block { width: 100%; }
 
 /* Form Group */
-.ios-fg { margin-bottom: 14px; }
-.ios-fg label { display: block; font-size: 13px; font-weight: 500; color: #8e8e93; margin-bottom: 6px; }
-.ios-fr { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.ios-fg { margin-bottom: 12px; }
+.ios-fg label { display: block; font-size: 12px; font-weight: 500; color: #8e8e93; margin-bottom: 5px; }
+.ios-fr { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
 /* Badges */
 .ios-badge {
@@ -212,17 +216,18 @@ body {
 .ios-table-wrap { overflow-x: auto; margin: 0 -16px; padding: 0 16px; }
 .ios-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .ios-table th {
-  padding: 8px 12px;
+  padding: 10px 12px;
   text-align: left;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   color: #8e8e93;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
   border-bottom: 0.5px solid rgba(60,60,67,0.08);
 }
-.ios-table td { padding: 10px 12px; border-bottom: 0.5px solid rgba(60,60,67,0.06); }
+.ios-table td { padding: 10px 12px; border-bottom: 0.5px solid rgba(60,60,67,0.05); }
 .ios-table tr:last-child td { border-bottom: none; }
+.ios-table tbody tr:hover { background: rgba(0,122,255,0.02); }
 
 /* Lists */
 .ios-list-item {
@@ -288,8 +293,8 @@ body {
 }
 .ios-modal {
   background: #f2f2f7;
-  border-radius: 14px 14px 0 0;
-  padding: 20px;
+  border-radius: 16px 16px 0 0;
+  padding: 24px 20px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
@@ -299,11 +304,11 @@ body {
   width: 36px; height: 5px;
   background: rgba(60,60,67,0.12);
   border-radius: 3px;
-  margin: 0 auto 14px;
+  margin: 0 auto 16px;
 }
-.ios-modal h2 { font-size: 20px; font-weight: 700; margin-bottom: 16px; }
-.ios-modal-actions { display: flex; gap: 8px; margin-top: 16px; }
-.ios-modal-actions .ios-btn { flex: 1; }
+.ios-modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+.ios-modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+.ios-modal-actions .ios-btn { flex: 1; padding: 12px; }
 
 /* Toast */
 .ios-toast {
@@ -346,8 +351,8 @@ body {
 .ios-mg .mg-status.paid { background: #34c759; color: white; border-color: #34c759; box-shadow: 0 1px 3px rgba(52,199,89,0.3); }
 
 /* Empty & Separator */
-.ios-empty { text-align: center; padding: 24px 16px; color: #8e8e93; font-size: 15px; }
-.ios-sep { height: 2px; background: transparent; border: none; }
+.ios-empty { text-align: center; padding: 32px 16px; color: #8e8e93; font-size: 14px; }
+.ios-sep { height: 8px; background: transparent; border: none; }
 
 /* Charts */
 .chart-container { height: 240px; margin-top: 4px; position: relative; }
@@ -387,19 +392,20 @@ body {
 /* Responsive */
 @media (min-width: 1024px) {
   body { padding-bottom: 0; }
-  .header-nav { display: flex; gap: 8px; margin-left: 32px; align-items: center; }
+  .header-nav { display: flex; gap: 4px; margin-left: 24px; align-items: center; }
   .header-item {
-    padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 500;
+    padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 500;
     color: #3a3a3c; cursor: pointer; transition: all 0.15s; border: none; background: transparent;
   }
   .header-item:hover { background: rgba(60,60,67,0.04); }
   .header-item.active { background: #e8f0fe; color: #007aff; font-weight: 600; }
   .d-none-mobile { display: inline-flex !important; }
-  .nav-bar { padding-left: 24px; padding-right: 24px; align-items: center; }
+  .nav-bar { padding: 10px 24px; align-items: center; }
   .tab-bar { display: none !important; }
   .ios-stats { grid-template-columns: repeat(4, 1fr); }
-  .ios-container { padding: 20px 24px 32px; max-width: 1200px; }
+  .ios-container { padding: 16px 24px 32px; max-width: 1200px; }
   .metode-charts { flex-direction: row; }
+  .ios-search { flex-wrap: nowrap; }
 }
 
 @media (min-width: 768px) and (max-width: 1023px) {
@@ -412,11 +418,11 @@ body {
 </head>
 <body>
 
-<div id="loginOverlay" style="position:fixed;top:0;left:0;right:0;bottom:0;background:#f2f2f7;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;">
-  <div style="background:white;padding:30px;border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,0.1);text-align:center;max-width:320px;width:100%;">
-    <img src="/logo.png" style="width:64px;height:64px;border-radius:12px;margin-bottom:16px;">
-    <h2 style="font-size:20px;margin-bottom:8px;">Yayasan Baitul Hikmah</h2>
-    <p style="color:#8e8e93;font-size:14px;margin-bottom:24px;">Silakan login untuk mengakses sistem manajemen pembayaran.</p>
+<div id="loginOverlay" style="position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(180deg,#f2f2f7 0%,#e5e5ea 100%);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;">
+  <div style="background:white;padding:32px 24px;border-radius:20px;box-shadow:0 8px 32px rgba(0,0,0,0.08);text-align:center;max-width:340px;width:100%;">
+    <img src="/logo.png" style="width:72px;height:72px;border-radius:16px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+    <h2 style="font-size:22px;margin-bottom:6px;font-weight:700">Yayasan Baitul Hikmah</h2>
+    <p style="color:#8e8e93;font-size:14px;margin-bottom:28px;line-height:1.4">Silakan login untuk mengakses sistem manajemen keuangan.</p>
     <div id="g_id_onload"
          data-client_id="824299592086-i37eukp0r06tl6s5fvi03i1ulkkn32rh.apps.googleusercontent.com"
          data-context="signin"
@@ -621,14 +627,14 @@ body {
     <input type="text" id="siswaSearch" class="ios-input" placeholder="Cari nama siswa..." oninput="loadSiswa()">
     <div class="ios-search-group">
       <span class="ios-search-label">Lembaga</span>
-      <select id="siswaLembaga" class="ios-select" onchange="loadSiswa()">
+      <select id="siswaLembaga" class="ios-select" onchange="loadKelasOptions(this.value)">
         <option value="">Semua</option>
         <option value="MIS">MIS</option>
         <option value="MTs">MTs</option>
         <option value="PAUD">PAUD</option>
       </select>
     </div>
-    <div class="ios-search-group">
+    <div class="ios-search-group" id="siswaKelasGroup">
       <span class="ios-search-label">Kelas</span>
       <select id="siswaKelas" class="ios-select" onchange="loadSiswa()">
         <option value="">Semua</option>
@@ -936,7 +942,7 @@ async function init() {
     $('lapBulanAkhir').innerHTML += `<option value="${i + 1}" ${i + 1 === 12 ? 'selected' : ''}>${n}</option>`
   })
   loadDashboard()
-  loadKelasOptions()
+  loadKelasOptions($('siswaLembaga').value)
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1138,6 +1144,23 @@ async function loadSiswa() {
   renderSiswa(results)
 }
 
+function loadKelasOptions(lembaga) {
+  const sel = $('siswaKelas')
+  const group = $('siswaKelasGroup')
+  if (lembaga === 'PAUD') {
+    group.classList.add('ios-hidden')
+    sel.value = ''
+    loadSiswa()
+    return
+  }
+  group.classList.remove('ios-hidden')
+  const kelasList = lembaga === 'MIS'
+    ? ['Kelas I', 'Kelas II', 'Kelas III', 'Kelas IV', 'Kelas V', 'Kelas VI']
+    : ['Kelas VII', 'Kelas VIII', 'Kelas IX']
+  sel.innerHTML = `<option value="">Semua Kelas</option>${kelasList.map(k => `<option value="${k}">${k}</option>`).join('')}`
+  loadSiswa()
+}
+
 function renderSiswa(data) {
   const tbody = $('siswaTable')
   if (data.length === 0) {
@@ -1164,21 +1187,6 @@ function renderSiswa(data) {
     </tr>`
   }
   tbody.innerHTML = html
-}
-
-async function loadKelasOptions() {
-  const sel = $('siswaKelas')
-  sel.innerHTML = '<option value="">Semua Kelas</option>'
-  for (const l of ['MIS', 'MTs']) {
-    try {
-      const data = await api(`/siswa?lembaga=${l}`)
-      data.forEach(s => {
-        if (s.kelas && ![...sel.options].some(o => o.value === s.kelas)) {
-          sel.innerHTML += `<option value="${s.kelas}">${s.kelas}</option>`
-        }
-      })
-    } catch (e) {}
-  }
 }
 
 function showTambahSiswa() {
