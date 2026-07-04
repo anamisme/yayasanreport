@@ -538,58 +538,55 @@ body {
     </div>
     <div id="paySearchResults" class="ios-mb2"></div>
 
-    <div id="payForm" class="ios-hidden" style="margin-top:12px;padding:16px;background:#f8f9fa;border-radius:12px">
+    <div id="payForm" class="ios-hidden" style="margin-top:14px;border-top:1px solid #e5e5ea;padding-top:16px">
       <!-- Header Siswa -->
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-        <div style="width:40px;height:40px;border-radius:20px;background:#007aff;color:white;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0">👤</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <div style="width:44px;height:44px;border-radius:22px;background:#007aff;color:white;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:600;flex-shrink:0">👤</div>
         <div style="flex:1;min-width:0">
-          <div id="payNama" style="font-size:16px;font-weight:600"></div>
-          <div id="payHeaderDetail" style="font-size:12px;color:#8e8e93;display:flex;gap:6px;align-items:center;flex-wrap:wrap"></div>
+          <div id="payNama" style="font-size:17px;font-weight:600"></div>
+          <div id="payHeaderDetail" style="font-size:12px;color:#8e8e93;display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:2px"></div>
         </div>
       </div>
 
-      <div class="ios-fr" style="margin-bottom:10px">
+      <div class="ios-fr">
         <div class="ios-fg">
-          <label style="font-size:11px;font-weight:500;color:#8e8e93;margin-bottom:4px;display:block">Bulan</label>
+          <label>Bulan</label>
           <select id="payBulan" class="ios-select"></select>
         </div>
         <div class="ios-fg">
-          <label style="font-size:11px;font-weight:500;color:#8e8e93;margin-bottom:4px;display:block">Tahun</label>
+          <label>Tahun</label>
           <select id="payTahun" class="ios-select"></select>
         </div>
       </div>
-      <div id="payKelasRow" class="ios-hidden" style="margin-bottom:10px">
-        <label style="font-size:11px;font-weight:500;color:#8e8e93;margin-bottom:4px;display:block">Kelas</label>
+      <div id="payKelasRow" class="ios-hidden ios-fg">
+        <label>Kelas</label>
         <input type="text" id="payKelas" class="ios-input" readonly>
       </div>
       <div class="ios-fg">
-        <label style="font-size:11px;font-weight:500;color:#8e8e93;margin-bottom:4px;display:block">Kategori</label>
+        <label>Kategori</label>
         <select id="payKategori" class="ios-select"></select>
       </div>
-      <div class="ios-fr" style="margin-bottom:10px">
+      <div class="ios-fr">
         <div class="ios-fg">
-          <label style="font-size:11px;font-weight:500;color:#8e8e93;margin-bottom:4px;display:block">Tipe</label>
+          <label>Tipe</label>
           <select id="payMetode" class="ios-select">
             <option value="Cash">💰 Cash</option>
             <option value="QRIS">📱 QRIS</option>
           </select>
         </div>
         <div class="ios-fg">
-          <label style="font-size:11px;font-weight:500;color:#8e8e93;margin-bottom:4px;display:block">Jumlah</label>
-          <div style="display:flex;align-items:center;gap:4px">
-            <span style="font-size:14px;color:#8e8e93;font-weight:500">Rp</span>
-            <input type="number" id="payJumlah" class="ios-input" placeholder="0" style="flex:1">
-          </div>
+          <label>Jumlah (Rp)</label>
+          <input type="number" id="payJumlah" class="ios-input" placeholder="0">
         </div>
       </div>
 
-      <div style="margin-bottom:10px">
-        <div style="font-size:11px;font-weight:500;color:#8e8e93;margin-bottom:4px">Status Bulanan</div>
-        <div style="font-size:10px;color:#8e8e93;margin-bottom:6px">Klik ✓ untuk tandai lunas, klik × untuk batalkan</div>
+      <div class="ios-fg">
+        <label>Status Bulanan</label>
+        <div style="font-size:11px;color:#8e8e93;margin-bottom:8px">Klik ✓ untuk tandai lunas, klik × untuk batalkan</div>
         <div id="payMonthGrid" class="ios-mg"></div>
       </div>
 
-      <div class="ios-f ios-g2">
+      <div class="ios-f ios-g2" style="margin-top:4px">
         <button class="ios-btn ios-btn-success" onclick="simpanPembayaran()" style="flex:1;padding:12px;font-size:15px">✅ Tandai Lunas</button>
         <button class="ios-btn ios-btn-danger" onclick="batalPembayaran()" style="flex:0;padding:12px 16px;font-size:15px">❌</button>
       </div>
