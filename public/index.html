@@ -585,16 +585,24 @@ body {
   </div>
 
   <div class="ios-card">
-    <div class="ios-card-header">
+    <div class="ios-card-header" style="flex-wrap:wrap;gap:8px">
       <div class="ios-card-title" style="margin-bottom:0">Riwayat Pembayaran</div>
-      <div class="ios-search-group">
-        <span class="ios-search-label">Lembaga</span>
-        <select id="riwayatLembaga" class="ios-select" onchange="loadRiwayat()" style="width:auto">
-        <option value="">Semua</option>
-        <option value="MIS">MIS</option>
-        <option value="MTs">MTs</option>
-        <option value="PAUD">PAUD</option>
-      </select>
+      <div style="display:flex;gap:6px;align-items:end;flex-wrap:wrap">
+        <div class="ios-search-group">
+          <span class="ios-search-label">Lembaga</span>
+          <select id="riwayatLembaga" class="ios-select" onchange="riwayatLembagaChange()">
+          <option value="">Semua</option>
+          <option value="MIS">MIS</option>
+          <option value="MTs">MTs</option>
+          <option value="PAUD">PAUD</option>
+        </select>
+        </div>
+        <div class="ios-search-group" id="riwayatKelasGroup">
+          <span class="ios-search-label">Kelas</span>
+          <select id="riwayatKelas" class="ios-select" onchange="loadRiwayat()">
+            <option value="">Semua</option>
+          </select>
+        </div>
       </div>
     </div>
     <div class="ios-table-wrap">
@@ -604,6 +612,7 @@ body {
             <th>Tanggal</th>
             <th>Nama</th>
             <th>Lembaga</th>
+            <th>Kelas</th>
             <th>Bulan</th>
             <th>Tahun</th>
             <th>Kategori</th>
@@ -1485,6 +1494,7 @@ async function simpanPembayaran() {
 
 async function loadRiwayat() {
   const lembaga = $('riwayatLembaga').value
+  const kelas = $('riwayatKelas').value
   const lembagas = lembaga ? [lembaga] : LEMBAGA_LIST
   let allPayments = []
   for (const l of lembagas) {
@@ -1493,13 +1503,15 @@ async function loadRiwayat() {
       allPayments = allPayments.concat(data)
     } catch (e) {}
   }
+  // Filter by kelas
+  if (kelas) allPayments = allPayments.filter(p => p.kelas === kelas)
   allPayments.sort((a, b) => {
     const [m1, y1] = a.tanggal.split(' '), [m2, y2] = b.tanggal.split(' ')
     return (parseInt(y2) - parseInt(y1)) || ((MONTH_MAP[m2] || 0) - (MONTH_MAP[m1] || 0))
   })
   const tbody = $('riwayatTable')
   if (allPayments.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="9" class="ios-empty">Belum ada pembayaran</td></tr>'
+    tbody.innerHTML = '<tr><td colspan="10" class="ios-empty">Belum ada pembayaran</td></tr>'
     return
   }
   tbody.innerHTML = allPayments.slice(0, 100).map(p => {
@@ -1510,6 +1522,7 @@ async function loadRiwayat() {
       <td class="ios-gray">${p.tanggal}</td>
       <td class="ios-bold">${p.nama}</td>
       <td>${badgeLembaga(p.lembaga)}</td>
+      <td class="ios-gray">${p.kelas || '-'}</td>
       <td class="ios-gray">${m || ''}</td>
       <td class="ios-gray">${y || ''}</td>
       <td><span class="ios-badge ios-badge-blue">${kategori}</span></td>
@@ -1518,6 +1531,23 @@ async function loadRiwayat() {
       ${window.userRole === 'superadmin' ? `<td><button class="ios-btn ios-btn-sm ios-btn-danger" onclick="hapusPembayaran(${p.siswaId}, '${p.lembaga}', ${p.bulan}, ${p.tahun})">Hapus</button></td>` : ''}
     </tr>`
   }).join('')
+}
+
+function riwayatLembagaChange() {
+  const lembaga = $('riwayatLembaga').value
+  const sel = $('riwayatKelas')
+  const group = $('riwayatKelasGroup')
+  if (lembaga === 'PAUD') {
+    group.style.display = 'none'
+    sel.value = ''
+  } else {
+    group.style.display = ''
+    const kelasList = lembaga === 'MIS'
+      ? ['Kelas I', 'Kelas II', 'Kelas III', 'Kelas IV', 'Kelas V', 'Kelas VI']
+      : ['Kelas VII', 'Kelas VIII', 'Kelas IX']
+    sel.innerHTML = `<option value="">Semua Kelas</option>${kelasList.map(k => `<option value="${k}">${k}</option>`).join('')}`
+  }
+  loadRiwayat()
 }
 
 async function hapusPembayaran(siswaId, lembaga, bulan, tahun) {

@@ -151,6 +151,7 @@ export async function onRequest(context) {
           const kategori = parts ? parts[3].trim() : 'Infaq'
           payments.push({
             id: i, siswaId: i + 1, nama: row[0],
+            kelas: lembaga === 'PAUD' ? '' : (row[1] || ''),
             bulan: mi < 6 ? mi + 7 : mi - 5,
             tahun: mi < 6 ? 2026 : 2027,
             jumlah, metode, kategori,
