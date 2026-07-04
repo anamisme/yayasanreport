@@ -781,6 +781,16 @@ body {
 
 <!-- PENGATURAN -->
 <div id="tab-pengaturan" class="tab-content ios-hidden">
+  <div class="ios-fb ios-mb2">
+    <div class="ios-card-title" style="margin-bottom:0;font-size:17px;color:#1c1c1e;text-transform:none;letter-spacing:0;font-weight:700">Pengaturan</div>
+  </div>
+  <div class="ios-card">
+    <div class="ios-card-title">📊 Spreadsheet Data</div>
+    <p style="font-size:12px;color:#8e8e93;margin:0 0 12px">Akses langsung ke Google Spreadsheet untuk melihat atau mengedit data mentah.</p>
+    <a id="sheetLink" href="#" target="_blank" class="ios-btn ios-btn-primary" style="text-decoration:none;width:100%;justify-content:center">
+      📗 Buka Spreadsheet
+    </a>
+  </div>
   <div class="ios-card">
     <div class="ios-card-title">⚙️ Pengaturan Akses</div>
     <p style="font-size:12px;color:#8e8e93;margin:0 0 12px">Kelola email yang dapat mengakses aplikasi. Superadmin dapat menghapus data, admin hanya bisa input/edit.</p>
@@ -946,7 +956,7 @@ function switchTab(tab) {
   if (tab === 'siswa') loadSiswa()
   if (tab === 'kategori') loadKategori()
   if (tab === 'laporan') loadLaporan()
-  if (tab === 'pengaturan') loadPengaturan()
+  if (tab === 'pengaturan') { loadPengaturan(); loadSheetUrl() }
 }
 
 document.querySelectorAll('.tab-item, .header-item[data-tab]').forEach((btn) => {
@@ -1685,6 +1695,20 @@ async function hapusKategori(id, nama) {
     toast('Kategori berhasil dihapus')
     loadKategori()
   } catch (e) { toast(e.message, 'error') }
+}
+
+// --- PENGATURAN ---
+async function loadSheetUrl() {
+  try {
+    const data = await api('/sheet-url')
+    if (data.url) {
+      $('sheetLink').href = data.url
+    } else {
+      $('sheetLink').style.display = 'none'
+    }
+  } catch (e) {
+    $('sheetLink').style.display = 'none'
+  }
 }
 
 // --- PENGATURAN AKSES ---
