@@ -1,7 +1,16 @@
-import { getGoogleAuthToken, getSheet, appendSheet, deleteSheetRow } from '../_utils/google-sheets.js'
+import { getGoogleAuthToken, getSheet, appendSheet, updateSheet, deleteSheetRow, createSheet } from '../_utils/google-sheets.js'
 
 const SHEET_NAME = 'Akses'
 const HEADERS = ['Email', 'Role', 'AddedAt']
+
+async function ensureSheet(token, sheetId) {
+  try {
+    await getSheet(token, sheetId, `${SHEET_NAME}!A1:A1`)
+  } catch (e) {
+    await createSheet(token, sheetId, SHEET_NAME)
+    await updateSheet(token, sheetId, `${SHEET_NAME}!A1:C1`, [HEADERS])
+  }
+}
 
 function parseRows(rows) {
   if (!rows || rows.length < 2) return []
@@ -38,6 +47,7 @@ export async function onRequest(context) {
   try {
     const token = await getGoogleAuthToken(env)
     const sheetId = env.GOOGLE_SHEET_ID
+    await ensureSheet(token, sheetId)
 
     if (method === 'POST') {
       const body = await request.json()
