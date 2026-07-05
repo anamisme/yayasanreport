@@ -579,7 +579,7 @@ body {
         </div>
         <div class="ios-fg">
           <label>Kategori</label>
-          <select id="payKategori" class="ios-select"></select>
+          <select id="payKategori" class="ios-select" onchange="payKategoriChange()"></select>
         </div>
       </div>
       <div class="ios-fr ios-mb2" style="grid-template-columns:1fr 1fr 1fr">
@@ -1397,7 +1397,7 @@ async function loadPayKategori(lembaga) {
       return
     }
     data.forEach(k => {
-      sel.innerHTML += `<option value="${k.nama}">${k.nama}</option>`
+      sel.innerHTML += `<option value="${k.nama}" data-jumlah="${k.jumlahDefault || 0}">${k.nama}</option>`
     })
   } catch (e) {
     sel.innerHTML = '<option value="Infaq">Infaq</option>'
@@ -1419,6 +1419,14 @@ function payLembagaChange() {
   }
   searchSiswaBayar()
   loadPayKategori(lembaga)
+}
+
+function payKategoriChange() {
+  const sel = $('payKategori')
+  const opt = sel.options[sel.selectedIndex]
+  if (opt && opt.dataset.jumlah) {
+    $('payJumlah').value = opt.dataset.jumlah
+  }
 }
 
 let paySearchTimeout = null
@@ -1481,6 +1489,7 @@ async function pilihSiswaBayar(id, lembaga, nama, kelas, row) {
       selectedSiswa.nominalInfaq = s.nominalInfaq || 0
       selectedPayments = s.payments || {}
       $('payJumlah').value = s.nominalInfaq || ''
+      payKategoriChange()
       renderMonthGrid()
     }
   } catch (e) {}
