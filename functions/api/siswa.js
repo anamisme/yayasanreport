@@ -142,9 +142,10 @@ export async function onRequest(context) {
                     }]
                   })
                 })
-                const catRow = isPaud
-                  ? [body.nama, String(total), ...MONTH_HEADERS.map(() => '')]
-                  : [body.nama, body.kelas || '', String(total), ...MONTH_HEADERS.map(() => '')]
+              const catNominal = parseInt(kr[3]) || 0
+              const catRow = isPaud
+                ? [body.nama, String(catNominal), ...MONTH_HEADERS.map(() => '')]
+                : [body.nama, body.kelas || '', String(catNominal), ...MONTH_HEADERS.map(() => '')]
                 const catColEnd = String.fromCharCode(64 + catRow.length)
                 await updateSheet(token, sheetId, `${catTitle}!A${catInsertPos}:${catColEnd}${catInsertPos}`, catRow)
               }

@@ -67,10 +67,11 @@ export async function onRequest(context) {
             for (let i = 1; i < vals.length; i++) {
               const r = vals[i]
               if (!r[0]) { rows.push(['', '', ...emptyMonths]); continue }
+              const def = String(body.jumlahDefault || 0)
               if (isPaud) {
-                rows.push([r[0], r[1] || '0', ...emptyMonths])
+                rows.push([r[0], def, ...emptyMonths])
               } else {
-                rows.push([r[0], r[1] || '', r[2] || '0', ...emptyMonths])
+                rows.push([r[0], r[1] || '', def, ...emptyMonths])
               }
             }
             await updateSheet(token, sheetId, `${title}!A:ZZ`, rows)
