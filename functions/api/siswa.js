@@ -45,7 +45,7 @@ export async function onRequest(context) {
       const row = isPaud
         ? [body.nama, total, ...MONTH_HEADERS.map(() => ''), String(total)]
         : [body.nama, body.kelas || '', total, ...MONTH_HEADERS.map(() => ''), String(total)]
-      await appendSheet(token, sheetId, `${lembaga}!A:ZZ`, row)
+      await appendSheet(token, sheetId, `${lembaga}!A:${String.fromCharCode(64 + row.length)}`, row)
       return new Response(JSON.stringify({ ...body }), { status: 201, headers })
     }
 
