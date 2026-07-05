@@ -156,3 +156,20 @@ export async function deleteSheetRow(token, sheetId, sheetName, rowIndex) {
   if (!resp.ok) throw new Error(`Failed to delete row: ${await resp.text()}`)
   return resp.json()
 }
+
+export async function deleteSheetTab(token, sheetId, sheetName) {
+  const info = await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  })).json()
+  const s = (info.sheets || []).find(sh => sh.properties.title === sheetName)
+  if (!s) return { notFound: true }
+  const gid = s.properties.sheetId
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}:batchUpdate`
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ requests: [{ deleteSheet: { sheetId: gid } }] }),
+  })
+  if (!resp.ok) throw new Error(`Failed to delete sheet tab: ${await resp.text()}`)
+  return resp.json()
+}

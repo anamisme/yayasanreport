@@ -1,4 +1,4 @@
-import { getGoogleAuthToken, getSheet, appendSheet, updateSheet, deleteSheetRow, createSheet, MONTH_HEADERS } from '../_utils/google-sheets.js'
+import { getGoogleAuthToken, getSheet, appendSheet, updateSheet, deleteSheetRow, deleteSheetTab, createSheet, MONTH_HEADERS } from '../_utils/google-sheets.js'
 
 const SHEET_NAME = 'Kategori'
 const HEADERS = ['ID', 'Nama', 'Lembaga', 'JumlahDefault', 'CreatedAt']
@@ -98,7 +98,7 @@ export async function onRequest(context) {
           headers,
         })
       }
-      const data = await getSheet(token, sheetId, `${SHEET_NAME}!A:A`)
+      const data = await getSheet(token, sheetId, `${SHEET_NAME}!A:E`)
       const rows = data.values || []
       const rowIdx = rows.findIndex((r) => parseInt(r[0]) === parseInt(id))
       if (rowIdx < 0) {
@@ -107,7 +107,14 @@ export async function onRequest(context) {
           headers,
         })
       }
+      const kategoriRow = rows[rowIdx]
+      const nama = kategoriRow[1] || ''
+      const lembaga = kategoriRow[2] || ''
       await deleteSheetRow(token, sheetId, SHEET_NAME, rowIdx)
+      if (nama) {
+        const title = `${lembaga || 'Semua'} - ${nama}`
+        await deleteSheetTab(token, sheetId, title)
+      }
       return new Response(JSON.stringify({ deleted: true }), { headers })
     }
 
