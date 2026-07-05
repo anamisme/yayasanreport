@@ -50,7 +50,7 @@ export async function onRequest(context) {
     }
 
     if (method === 'PUT') {
-      const id = parseInt(url.searchParams.get('id'))
+      let id = parseInt(url.searchParams.get('id'))
       if (!id) { return new Response(JSON.stringify({ error: 'id diperlukan' }), { status: 400, headers }) }
       const body = await request.json()
       const data = await getSheet(token, sheetId, `${lembaga}!A:ZZ`)
@@ -80,7 +80,7 @@ export async function onRequest(context) {
       if (role !== 'superadmin') {
         return new Response(JSON.stringify({ error: 'Forbidden', message: 'Hanya superadmin yang dapat menghapus data' }), { status: 403, headers })
       }
-      const id = parseInt(url.searchParams.get('id'))
+      let id = parseInt(url.searchParams.get('id'))
       if (!id) { return new Response(JSON.stringify({ error: 'id diperlukan' }), { status: 400, headers }) }
       const data = await getSheet(token, sheetId, `${lembaga}!A:ZZ`)
       const rows = data.values || []
