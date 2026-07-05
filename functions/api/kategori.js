@@ -74,7 +74,8 @@ export async function onRequest(context) {
                 rows.push([r[0], r[1] || '', def, ...emptyMonths])
               }
             }
-            await updateSheet(token, sheetId, `${title}!A:ZZ`, rows)
+            const maxCol = Math.max(...rows.map(r => r.length))
+            await updateSheet(token, sheetId, `${title}!A:${String.fromCharCode(64 + maxCol)}`, rows)
           }
         } catch (e) {
           // Sheet lembaga might not exist yet, that's OK
