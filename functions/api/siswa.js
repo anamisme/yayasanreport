@@ -1,4 +1,4 @@
-import { getGoogleAuthToken, getSheet, appendSheet, updateSheet, deleteSheetRow, MONTH_HEADERS } from '../_utils/google-sheets.js'
+import { getGoogleAuthToken, getSheet, appendSheet, updateSheet, deleteSheetRow, getSheetId, MONTH_HEADERS } from '../_utils/google-sheets.js'
 
 function parseValues(rows, lembaga) {
   if (!rows || rows.length < 2) return []
@@ -45,6 +45,59 @@ export async function onRequest(context) {
       const row = isPaud
         ? [body.nama, total, ...MONTH_HEADERS.map(() => ''), String(total)]
         : [body.nama, body.kelas || '', total, ...MONTH_HEADERS.map(() => ''), String(total)]
+
+      const existing = await getSheet(token, sheetId, `${lembaga}!A:A`)
+      const allRows = existing.values || []
+      let insertPos = allRows.length + 1
+
+      if (!isPaud) {
+        const kelasList = lembaga === 'MIS'
+          ? ['Kelas I', 'Kelas II', 'Kelas III', 'Kelas IV', 'Kelas V', 'Kelas VI']
+          : ['Kelas VII', 'Kelas VIII', 'Kelas IX']
+        const targetIdx = kelasList.indexOf(body.kelas || '')
+
+        if (targetIdx >= 0) {
+          let insertAfter = -1
+          for (let i = 1; i < allRows.length; i++) {
+            const cell = allRows[i] && allRows[i][0]
+            if (!cell) continue
+            if (cell.startsWith('Jumlah ')) {
+              const jk = cell.replace('Jumlah ', '')
+              const jkIdx = kelasList.indexOf(jk)
+              if (jkIdx >= 0 && jkIdx < targetIdx) insertAfter = i
+              continue
+            }
+            const kIdx = kelasList.indexOf((allRows[i][1] || ''))
+            if (kIdx === targetIdx) {
+              insertAfter = i
+            } else if (kIdx > targetIdx) {
+              break
+            }
+          }
+          if (insertAfter < 0) insertAfter = 0
+          insertPos = Math.min(insertAfter + 2, allRows.length + 1)
+        }
+
+        const gid = await getSheetId(token, sheetId, lembaga)
+        if (gid) {
+          await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}:batchUpdate`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              requests: [{
+                insertDimension: {
+                  range: { sheetId: gid, dimension: 'ROWS', startIndex: insertPos - 1, endIndex: insertPos },
+                  inheritFromBefore: true
+                }
+              }]
+            })
+          })
+          const colEnd = String.fromCharCode(64 + row.length)
+          await updateSheet(token, sheetId, `${lembaga}!A${insertPos}:${colEnd}${insertPos}`, row)
+          return new Response(JSON.stringify({ ...body }), { status: 201, headers })
+        }
+      }
+
       await appendSheet(token, sheetId, `${lembaga}!A:${String.fromCharCode(64 + row.length)}`, row)
       return new Response(JSON.stringify({ ...body }), { status: 201, headers })
     }
