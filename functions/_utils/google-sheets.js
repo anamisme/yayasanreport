@@ -105,13 +105,17 @@ export function getMonthIdx(bulan, tahun) {
 }
 
 export async function getSheetId(token, sheetId, sheetName) {
-  const info = await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}`)).json()
+  const info = await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  })).json()
   const s = (info.sheets || []).find(s => s.properties.title === sheetName)
   return s ? s.properties.sheetId : null
 }
 
 export async function createSheet(token, sheetId, title) {
-  const info = await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}`)).json()
+  const info = await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  })).json()
   if ((info.sheets || []).some(s => s.properties.title === title)) return { alreadyExists: true }
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}:batchUpdate`
   const resp = await fetch(url, {
@@ -124,7 +128,9 @@ export async function createSheet(token, sheetId, title) {
 }
 
 export async function deleteSheetRow(token, sheetId, sheetName, rowIndex) {
-  const info = await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}`)).json()
+  const info = await (await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  })).json()
   const s = (info.sheets || []).find(sh => sh.properties.title === sheetName)
   if (!s) throw new Error(`Sheet "${sheetName}" not found`)
   const gid = s.properties.sheetId
