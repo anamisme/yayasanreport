@@ -1,4 +1,4 @@
-import { getGoogleAuthToken, getSheet, MONTH_HEADERS } from '../_utils/google-sheets.js'
+import { getGoogleAuthToken, getSheet, SHEET_NAMES, MONTH_HEADERS } from '../_utils/google-sheets.js'
 
 export async function onRequest(context) {
   const { request, env } = context
@@ -8,6 +8,9 @@ export async function onRequest(context) {
     const token = await getGoogleAuthToken(env)
     const sheetId = env.GOOGLE_SHEET_ID
     const lembaga = url.searchParams.get('lembaga') || 'MIS'
+    if (!SHEET_NAMES.includes(lembaga)) {
+      return new Response(JSON.stringify({ error: `lembaga tidak valid: ${lembaga}` }), { headers, status: 400 })
+    }
     const kelasFilter = url.searchParams.get('kelas') || ''
     const bulanAwal = parseInt(url.searchParams.get('bulanAwal')) || 7
     const bulanAkhir = parseInt(url.searchParams.get('bulanAkhir')) || 12

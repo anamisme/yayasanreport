@@ -1,4 +1,4 @@
-import { getGoogleAuthToken, getSheet, appendSheet, updateSheet, deleteSheetRow, getSheetId, MONTH_HEADERS } from '../_utils/google-sheets.js'
+import { getGoogleAuthToken, getSheet, appendSheet, updateSheet, deleteSheetRow, getSheetId, SHEET_NAMES, MONTH_HEADERS } from '../_utils/google-sheets.js'
 
 function parseValues(rows, lembaga) {
   if (!rows || rows.length < 2) return []
@@ -37,6 +37,9 @@ export async function onRequest(context) {
     const token = await getGoogleAuthToken(env)
     const sheetId = env.GOOGLE_SHEET_ID
     const lembaga = (url.searchParams.get('lembaga') || 'MIS')
+    if (!SHEET_NAMES.includes(lembaga)) {
+      return new Response(JSON.stringify({ error: `lembaga tidak valid: ${lembaga}` }), { status: 400, headers })
+    }
 
     if (method === 'POST') {
       const body = await request.json()
@@ -161,15 +164,16 @@ export async function onRequest(context) {
     }
 
     if (method === 'PUT') {
-      let id = parseInt(url.searchParams.get('id'))
+      const id = parseInt(url.searchParams.get('id'))
       if (!id) { return new Response(JSON.stringify({ error: 'id diperlukan' }), { status: 400, headers }) }
       const body = await request.json()
       const data = await getSheet(token, sheetId, `${lembaga}!A:ZZ`)
       const rows = data.values || []
       let targetIdx = -1
+      let seq = id
       for (let i = 1; i < rows.length; i++) {
         if (rows[i] && rows[i][0] && !rows[i][0].startsWith('Jumlah ')) {
-          if (--id === 0) { targetIdx = i; break }
+          if (--seq === 0) { targetIdx = i; break }
         }
       }
       if (targetIdx < 0) { return new Response(JSON.stringify({ error: 'siswa tidak ditemukan' }), { status: 404, headers }) }
@@ -191,14 +195,15 @@ export async function onRequest(context) {
       if (role !== 'superadmin') {
         return new Response(JSON.stringify({ error: 'Forbidden', message: 'Hanya superadmin yang dapat menghapus data' }), { status: 403, headers })
       }
-      let id = parseInt(url.searchParams.get('id'))
+      const id = parseInt(url.searchParams.get('id'))
       if (!id) { return new Response(JSON.stringify({ error: 'id diperlukan' }), { status: 400, headers }) }
       const data = await getSheet(token, sheetId, `${lembaga}!A:ZZ`)
       const rows = data.values || []
       let targetIdx = -1
+      let seq = id
       for (let i = 1; i < rows.length; i++) {
         if (rows[i] && rows[i][0] && !rows[i][0].startsWith('Jumlah ')) {
-          if (--id === 0) { targetIdx = i; break }
+          if (--seq === 0) { targetIdx = i; break }
         }
       }
       if (targetIdx < 0) { return new Response(JSON.stringify({ error: 'siswa tidak ditemukan' }), { status: 404, headers }) }

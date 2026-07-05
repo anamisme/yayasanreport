@@ -1,4 +1,4 @@
-import { getGoogleAuthToken, getSheet, updateSheet, MONTH_HEADERS, getMonthIdx } from '../_utils/google-sheets.js'
+import { getGoogleAuthToken, getSheet, updateSheet, SHEET_NAMES, MONTH_HEADERS, getMonthIdx } from '../_utils/google-sheets.js'
 
 export async function onRequest(context) {
   const { request, env } = context
@@ -17,6 +17,9 @@ export async function onRequest(context) {
     const token = await getGoogleAuthToken(env)
     const sheetId = env.GOOGLE_SHEET_ID
     const lembaga = (url.searchParams.get('lembaga') || 'MIS')
+    if (!SHEET_NAMES.includes(lembaga)) {
+      return new Response(JSON.stringify({ error: `lembaga tidak valid: ${lembaga}` }), { status: 400, headers })
+    }
 
     if (method === 'PUT') {
       const rowId = parseInt(url.searchParams.get('siswaId'))
@@ -35,7 +38,7 @@ export async function onRequest(context) {
 
       const data = await getSheet(token, sheetId, `${lembaga}!A:ZZ`)
       const rows = data.values || []
-      if (rowId >= rows.length) {
+      if (rowId < 2 || rowId >= rows.length) {
         return new Response(JSON.stringify({ error: 'siswa tidak ditemukan' }), { status: 404, headers })
       }
       const headersRow = rows[0] || []
