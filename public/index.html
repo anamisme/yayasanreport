@@ -484,7 +484,7 @@ body {
       </nav>
     </div>
     <div style="display:flex;gap:10px;align-items:center;">
-      <button class="ios-btn ios-btn-sm ios-btn-primary d-none-mobile" onclick="switchTab('bayar')">+ Pembayaran</button>
+      <button class="ios-btn ios-btn-sm ios-btn-primary d-none-mobile" onclick="switchTab('bayar');setTimeout(function(){var s=$('paySearch');if(s){s.focus()}},300)">+ Pembayaran</button>
       <button class="ios-btn ios-btn-danger" onclick="logout()" style="padding:7px 14px;font-size:13px;font-weight:500;border-radius:8px">Keluar</button>
     </div>
 </nav>
@@ -548,33 +548,15 @@ body {
       </div>
       <div class="ios-search-group" id="payKelasGroup" style="flex:1;min-width:80px">
         <span class="ios-search-label">Kelas</span>
-        <select id="payKelas" class="ios-select" onchange="loadQuickPay()" style="width:auto">
+        <select id="payKelas" class="ios-select" onchange="searchSiswaBayar()" style="width:auto">
           <option value="">Semua Kelas</option>
         </select>
       </div>
-      <div class="ios-search-group" style="flex:1;min-width:80px">
-        <span class="ios-search-label">Metode</span>
-        <select id="quickPayMetode" class="ios-select" style="width:auto">
-          <option value="Cash">💰 Cash</option>
-          <option value="QRIS">📱 QRIS</option>
-        </select>
-      </div>
     </div>
-
-    <div class="ios-table-wrap">
-      <table class="ios-table">
-        <thead>
-          <tr>
-            <th>No</th>
-            <th>Nama</th>
-            <th>Kelas</th>
-            <th>Status</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody id="quickPayTable"></tbody>
-      </table>
+    <div class="ios-search">
+      <input type="text" id="paySearch" class="ios-input" placeholder="Cari nama siswa..." oninput="searchSiswaBayar()">
     </div>
+    <div id="paySearchResults"></div>
 
     <div id="payForm" class="ios-hidden" style="margin-top:14px;padding-top:16px;border-top:1px solid #e5e5ea">
       <!-- Header Siswa -->
@@ -603,7 +585,7 @@ body {
       <div class="ios-fr ios-mb2" style="grid-template-columns:1fr 1fr 1fr">
         <div id="payKelasRow" class="ios-fg ios-hidden">
           <label>Kelas</label>
-          <input type="text" id="payKelas" class="ios-input" readonly>
+          <input type="text" id="payKelasForm" class="ios-input" readonly>
         </div>
         <div class="ios-fg">
           <label>Tipe</label>
@@ -970,7 +952,7 @@ function switchTab(tab) {
   document.querySelectorAll('.tab-content').forEach((t) => t.classList.add('ios-hidden'))
   $(`tab-${tab}`).classList.remove('ios-hidden')
   if (tab === 'dashboard') loadDashboard()
-  if (tab === 'bayar') { loadRiwayat(); loadQuickPay(); initBayarForm() }
+  if (tab === 'bayar') { loadRiwayat(); initBayarForm() }
   if (tab === 'siswa') loadSiswa()
   if (tab === 'kategori') loadKategori()
   if (tab === 'laporan') loadLaporan()
@@ -1435,84 +1417,52 @@ function payLembagaChange() {
       : ['Kelas VII', 'Kelas VIII', 'Kelas IX']
     sel.innerHTML = `<option value="">Semua Kelas</option>${kelasList.map(k => `<option value="${k}">${k}</option>`).join('')}`
   }
-  loadQuickPay()
+  searchSiswaBayar()
   loadPayKategori(lembaga)
 }
 
-async function loadQuickPay() {
+let paySearchTimeout = null
+
+async function searchSiswaBayar() {
+  clearTimeout(paySearchTimeout)
+  const q = $('paySearch').value.trim()
   const lembaga = $('payLembaga').value
   const kelas = $('payKelas').value
-  const tbody = $('quickPayTable')
-  $('payForm').classList.add('ios-hidden')
-
-  if (!lembaga) {
-    tbody.innerHTML = '<tr><td colspan="5" class="ios-empty">Pilih lembaga</td></tr>'
+  if (q.length < 2) {
+    $('paySearchResults').innerHTML = ''
+    selectedSiswa = null
+    selectedPayments = {}
+    $('payForm').classList.add('ios-hidden')
     return
   }
-
-  try {
-    let url = `/siswa?lembaga=${lembaga}`
-    if (kelas) url += `&kelas=${encodeURIComponent(kelas)}`
-    const siswa = await api(url)
-    const defaultMonth = MONTH_HEADERS[0]
-
-    tbody.innerHTML = siswa.map(s => {
-      const isPaid = s.payments && s.payments[defaultMonth]
-      return `<tr>
-        <td class="ios-gray">${s.id}</td>
-        <td class="ios-bold" style="cursor:pointer" onclick='pilihSiswaBayar(${s.id}, ${JSON.stringify(s.lembaga)}, ${JSON.stringify(s.nama)}, ${JSON.stringify(s.kelas || "")}, ${s.row})'>${esc(s.nama)}</td>
-        <td class="ios-gray">${esc(s.kelas || '-')}</td>
-        <td>${isPaid ? '<span class="ios-badge ios-badge-green">✓ Lunas</span>' : '<span class="ios-badge ios-badge-orange">× Belum</span>'}</td>
-        <td>${isPaid
-          ? (window.userRole === 'superadmin'
-            ? `<button class="ios-btn ios-btn-sm ios-btn-danger" onclick='quickUnpay(${s.row}, ${JSON.stringify(s.lembaga)}, "${defaultMonth}")'>Batalkan</button>`
-            : '<span class="ios-gray" style="font-size:12px">Lunas</span>')
-          : `<button class="ios-btn ios-btn-sm ios-btn-success" onclick='quickPay(${s.row}, ${JSON.stringify(s.lembaga)}, ${JSON.stringify(s.nama)}, "${defaultMonth}", ${s.nominalInfaq || 0})'>Bayar</button>`
-        }</td>
-      </tr>`
-    }).join('')
-  } catch (e) {
-    tbody.innerHTML = `<tr><td colspan="5" class="ios-empty">${esc(e.message)}</td></tr>`
-  }
-}
-
-async function quickPay(row, lembaga, nama, monthHeader, nominalDefault) {
-  const metode = $('quickPayMetode').value
-  const jumlah = nominalDefault || 0
-  const kategori = $('payKategori').value
-  const parts = monthHeader.split(' ')
-  const bulan = MONTH_MAP[parts[0].substring(0, 3)]
-  const tahun = parseInt(parts[1])
-
-  if (!bulan || !tahun) { toast('Bulan tidak valid', 'error'); return }
-
-  try {
-    await api(`/pembayaran?lembaga=${lembaga}`, {
-      method: 'POST',
-      body: JSON.stringify({ rowId: row, bulan, tahun, jumlah, kategori, metode }),
-    })
-    toast(`${nama} — ${monthHeader} ✅ ${kategori} ${metode} Rp${(jumlah||0).toLocaleString('id-ID')}`)
-    loadQuickPay()
-  } catch (e) { toast(e.message, 'error') }
-}
-
-async function quickUnpay(row, lembaga, monthHeader) {
-  if (!confirm(`Batalkan pembayaran ${monthHeader}?`)) return
-  const parts = monthHeader.split(' ')
-  const bulan = MONTH_MAP[parts[0].substring(0, 3)]
-  const tahun = parseInt(parts[1])
-
-  try {
-    await api(`/pembayaran?lembaga=${lembaga}&rowId=${row}&bulan=${bulan}&tahun=${tahun}`, { method: 'DELETE' })
-    toast(`Pembayaran ${monthHeader} dibatalkan`)
-    loadQuickPay()
-  } catch (e) { toast(e.message, 'error') }
+  paySearchTimeout = setTimeout(async () => {
+    try {
+      let data = await api(`/siswa?lembaga=${lembaga}&search=${encodeURIComponent(q)}`)
+      if (kelas) data = data.filter(s => s.kelas === kelas)
+      if (data.length === 0) {
+        $('paySearchResults').innerHTML = '<div class="ios-empty">Siswa tidak ditemukan</div>'
+        return
+      }
+      $('paySearchResults').innerHTML = data.slice(0, 10).map(s => `
+        <div class="ios-list-item" style="cursor:pointer"
+             onclick='pilihSiswaBayar(${s.id}, ${JSON.stringify(s.lembaga)}, ${JSON.stringify(s.nama)}, ${JSON.stringify(s.kelas || "")}, ${s.row})'>
+          <span>
+            <span class="ios-bold">${esc(s.nama)}</span>
+            ${s.kelas ? `<br><span class="ios-gray" style="font-size:12px">${esc(s.kelas)}</span>` : ''}
+          </span>
+          <span style="margin-left:auto">${badgeLembaga(s.lembaga)}</span>
+        </div>
+      `).join('')
+    } catch (e) {}
+  }, 300)
 }
 
 async function pilihSiswaBayar(id, lembaga, nama, kelas, row) {
   selectedSiswa = { id, lembaga, nama, kelas, row }
   $('payNama').textContent = nama
   $('payHeaderDetail').innerHTML = `<span style="background:#e8f0fe;color:#007aff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600">${lembaga}</span>${kelas ? `<span>• ${kelas}</span>` : ''}`
+  $('paySearchResults').innerHTML = ''
+  $('paySearch').value = nama
   $('payForm').classList.remove('ios-hidden')
 
   const kelasRow = $('payKelasRow')
@@ -1521,6 +1471,7 @@ async function pilihSiswaBayar(id, lembaga, nama, kelas, row) {
   } else {
     kelasRow.classList.remove('ios-hidden')
     $('payKelas').value = kelas || ''
+    $('payKelasForm').value = kelas || ''
   }
 
   try {
@@ -1590,7 +1541,8 @@ function batalPembayaran() {
   selectedSiswa = null
   selectedPayments = {}
   $('payForm').classList.add('ios-hidden')
-  loadQuickPay()
+  $('paySearch').value = ''
+  $('paySearchResults').innerHTML = ''
 }
 
 async function simpanPembayaran() {
